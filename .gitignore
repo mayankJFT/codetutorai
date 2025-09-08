@@ -101,9 +101,9 @@ llm_cache.json
 # Output files
 output/
 
-# uv manage
-pyproject.toml
-uv.lock
+# Next.js
+frontend/.next/
+frontend/out/
 
-docs/*.pdf
-docs/design-cn.md
+# Additional cleanup files
+*.DS_Store

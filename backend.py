@@ -13,7 +13,6 @@ from pydantic import BaseModel, EmailStr
 from typing import Optional, List, Dict, Any
 import uuid
 import os
-import json
 import re
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
@@ -22,7 +21,6 @@ from concurrent.futures import ThreadPoolExecutor
 import bcrypt
 from jose import JWTError, jwt
 import requests
-import json
 import markdown
 from reportlab.lib.pagesizes import letter, A4
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, PageBreak, Table, TableStyle, Image

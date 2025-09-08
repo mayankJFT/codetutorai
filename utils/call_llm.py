@@ -93,51 +93,8 @@ def call_llm(prompt: str, use_cache: bool = True) -> str:
     return response_text
 
 
-# Alternative implementations (commented out for reference)
-
-# # Use Azure OpenAI
-# def call_llm(prompt, use_cache: bool = True):
-#     from openai import AzureOpenAI
-
-#     endpoint = "https://<azure openai name>.openai.azure.com/"
-#     deployment = "<deployment name>"
-#     subscription_key = "<azure openai key>"
-#     api_version = "<api version>"
-
-#     client = AzureOpenAI(
-#         api_version=api_version,
-#         azure_endpoint=endpoint,
-#         api_key=subscription_key,
-#     )
-
-#     r = client.chat.completions.create(
-#         model=deployment,
-#         messages=[{"role": "user", "content": prompt}],
-#         response_format={"type": "text"},
-#         max_completion_tokens=40000,
-#         reasoning_effort="medium",
-#         store=False
-#     )
-#     return r.choices[0].message.content
-
-# # Use Anthropic Claude
-# def call_llm(prompt, use_cache: bool = True):
-#     from anthropic import Anthropic
-#     client = Anthropic(api_key=os.environ.get("ANTHROPIC_API_KEY", "your-api-key"))
-#     response = client.messages.create(
-#         model="claude-3-sonnet-20240229",
-#         max_tokens=4000,
-#         messages=[
-#             {"role": "user", "content": prompt}
-#         ]
-#     )
-#     return response.content[0].text
-
-
 if __name__ == "__main__":
     test_prompt = "Hello, how are you?"
-
-    # First call - should hit the API
     print("Making call...")
     response1 = call_llm(test_prompt, use_cache=False)
     print(f"Response: {response1}")

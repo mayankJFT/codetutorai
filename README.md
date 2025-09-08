@@ -190,7 +190,6 @@ Repocourseai/
 │   ├── lib/              # Utility functions
 │   └── package.json      # Node.js dependencies
 ├── utils/
-│   ├── ai_code_analyzer.py    # AI analysis engine
 │   ├── call_llm.py           # OpenAI API interface
 │   └── crawl_local_files.py  # File system utilities
 └── pdf-server.js         # PDF generation microservice

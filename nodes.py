@@ -5,7 +5,7 @@ from pocketflow import Node, BatchNode
 from utils.crawl_github_files import crawl_github_files
 from utils.call_llm import call_llm
 from utils.crawl_local_files import crawl_local_files
-from utils.ai_code_analyzer import ai_analyzer
+# AI code analyzer functionality removed
 
 
 # Helper to get content for specific file indices
@@ -86,43 +86,49 @@ class FetchRepo(Node):
 
 
 class AICodeAnalysisNode(Node):
-    """AI-powered code analysis for enhanced insights"""
+    """Simple code analysis without external AI dependencies"""
     
     def prep(self, shared):
         files_data = shared["files"]
         project_name = shared["project_name"]
         language = shared.get("language", "english")
-        use_cache = shared.get("use_cache", True)
         
         return {
             "files_data": files_data[:10],  # Analyze first 10 files for performance
             "project_name": project_name,
-            "language": language,
-            "use_cache": use_cache
+            "language": language
         }
     
     def exec(self, prep_res):
         files_data = prep_res["files_data"]
         project_name = prep_res["project_name"]
         
-        print(f"Performing AI code analysis for {project_name}...")
+        print(f"Performing basic code analysis for {project_name}...")
         
-        # Analyze architecture patterns
-        architecture_components = ai_analyzer.detect_architecture_patterns(files_data)
-        
-        # Analyze individual files
+        # Simple file analysis without external dependencies
         file_analyses = []
+        architecture_components = []
+        
         for path, content in files_data:
             if content.strip():  # Skip empty files
-                # Detect language from file extension
-                file_lang = "python" if path.endswith('.py') else "javascript" if path.endswith('.js') else "generic"
-                analysis = ai_analyzer.analyze_code_structure(content, path, file_lang)
+                # Basic file analysis
+                lines = content.split('\n')
+                analysis = {
+                    'file_path': path,
+                    'line_count': len(lines),
+                    'file_size': len(content),
+                    'language': self._detect_language(path),
+                    'complexity_analysis': {'score': min(10, len(lines) // 20)}  # Simple complexity based on line count
+                }
                 file_analyses.append(analysis)
                 
-                # Generate code insights for complex files
-                if len(content.split('\n')) > 20:  # Files with more than 20 lines
-                    insights = ai_analyzer.generate_code_explanations(content[:800], f"File: {path}")
-                    analysis['code_insights'] = insights
+                # Basic architecture detection
+                if any(keyword in content.lower() for keyword in ['class ', 'function ', 'def ', 'interface']):
+                    architecture_components.append({
+                        'type': 'code_structure',
+                        'file': path,
+                        'description': f'Contains code structures in {path}'
+                    })
         
         return {
             "architecture_components": architecture_components,
@@ -134,12 +140,29 @@ class AICodeAnalysisNode(Node):
             }
         }
     
+    def _detect_language(self, path):
+        """Simple language detection based on file extension"""
+        ext_map = {
+            '.py': 'python',
+            '.js': 'javascript',
+            '.ts': 'typescript',
+            '.java': 'java',
+            '.cpp': 'cpp',
+            '.c': 'c',
+            '.go': 'go',
+            '.rs': 'rust',
+            '.php': 'php',
+            '.rb': 'ruby'
+        }
+        ext = os.path.splitext(path)[1].lower()
+        return ext_map.get(ext, 'generic')
+    
     def post(self, shared, prep_res, exec_res):
         shared["ai_analysis"] = exec_res
-        print(f"AI analysis complete: {exec_res['analysis_summary']['total_files_analyzed']} files analyzed")
+        print(f"Basic analysis complete: {exec_res['analysis_summary']['total_files_analyzed']} files analyzed")
         # Update progress
         if "update_progress" in shared:
-            shared["update_progress"]("AI Code Analysis", 20, f"Analyzed {exec_res['analysis_summary']['total_files_analyzed']} files with AI insights")
+            shared["update_progress"]("Code Analysis", 20, f"Analyzed {exec_res['analysis_summary']['total_files_analyzed']} files")
 
 class IdentifyAbstractions(Node):
     def prep(self, shared):

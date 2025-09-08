@@ -2,7 +2,6 @@ from pocketflow import Flow
 # Import all node classes from nodes.py
 from nodes import (
     FetchRepo,
-    AICodeAnalysisNode,
     IdentifyAbstractions,
     AnalyzeRelationships,
     OrderChapters,
@@ -15,16 +14,14 @@ def create_tutorial_flow():
 
     # Instantiate nodes
     fetch_repo = FetchRepo()
-    ai_analysis = AICodeAnalysisNode(max_retries=3, wait=15)
     identify_abstractions = IdentifyAbstractions(max_retries=5, wait=20)
     analyze_relationships = AnalyzeRelationships(max_retries=5, wait=20)
     order_chapters = OrderChapters(max_retries=5, wait=20)
     write_chapters = WriteChapters(max_retries=5, wait=20) # This is a BatchNode
     combine_tutorial = CombineTutorial()
 
-    # Connect nodes in sequence with AI analysis
-    fetch_repo >> ai_analysis
-    ai_analysis >> identify_abstractions
+    # Connect nodes in sequence
+    fetch_repo >> identify_abstractions
     identify_abstractions >> analyze_relationships
     analyze_relationships >> order_chapters
     order_chapters >> write_chapters
