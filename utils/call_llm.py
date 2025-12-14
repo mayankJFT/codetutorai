@@ -24,7 +24,7 @@ logger.addHandler(file_handler)
 cache_file = "llm_cache.json"
 
 
-# Default OpenAI implementation for code understanding and tutorial generation
+# Default Groq implementation for code understanding and tutorial generation
 def call_llm(prompt: str, use_cache: bool = True) -> str:
     # Log the prompt
     logger.info(f"PROMPT: {prompt}")
@@ -46,26 +46,27 @@ def call_llm(prompt: str, use_cache: bool = True) -> str:
             return cache[prompt]
 
     try:
-        from openai import OpenAI
-        
-        client = OpenAI(
-            api_key=os.getenv("OPENAI_API_KEY", "your-openai-api-key")
+        from groq import Groq
+
+        client = Groq(
+            api_key=os.getenv("GROQ_API_KEY")
         )
-        
-        response = client.chat.completions.create(
-            model=os.getenv("OPENAI_MODEL", "gpt-4"),
+
+        completion = client.chat.completions.create(
+            model=os.getenv("GROQ_MODEL", "meta-llama/llama-4-scout-17b-16e-instruct"),
             messages=[{"role": "user", "content": prompt}],
-            max_tokens=4000,
-            temperature=0.7
+            temperature=0.7,
+            max_completion_tokens=4000,
+            top_p=1,
         )
-        
-        response_text = response.choices[0].message.content
-        
+
+        response_text = completion.choices[0].message.content
+
     except ImportError:
-        logger.error("OpenAI library not installed. Install with: pip install openai")
-        raise Exception("OpenAI library not available")
+        logger.error("Groq library not installed. Install with: pip install groq")
+        raise Exception("Groq library not available")
     except Exception as e:
-        logger.error(f"OpenAI API call failed: {e}")
+        logger.error(f"Groq API call failed: {e}")
         raise Exception(f"API call failed: {e}")
 
     # Log the response
@@ -95,6 +96,6 @@ def call_llm(prompt: str, use_cache: bool = True) -> str:
 
 if __name__ == "__main__":
     test_prompt = "Hello, how are you?"
-    print("Making call...")
+    print("Making Gemini API call...")
     response1 = call_llm(test_prompt, use_cache=False)
     print(f"Response: {response1}")
