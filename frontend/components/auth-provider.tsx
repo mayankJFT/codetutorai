@@ -66,25 +66,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Redirect logic
   useEffect(() => {
     const isAuthPage = pathname?.startsWith('/auth/')
-    
+    const isPublic = pathname === '/' || isAuthPage
+
     // Only redirect after initialization is complete
     if (!hasInitialized) return
-    
-    if (!isAuthenticated && !isAuthPage) {
+
+    if (!isAuthenticated && !isPublic) {
       router.push('/auth/login')
     } else if (isAuthenticated && isAuthPage && !isLoading && user) {
       // Only redirect away from auth pages if we have user data and not loading
-      router.push('/')
+      router.push('/dashboard')
     }
   }, [isAuthenticated, isLoading, pathname, router, user, hasInitialized])
 
   // Show loading spinner on initial load
   if (isLoading && isAuthenticated) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-slate-950 dark:to-blue-950 flex items-center justify-center">
+      <div className="flex min-h-screen items-center justify-center bg-background">
         <div className="text-center">
-          <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-slate-600 dark:text-slate-400">Loading...</p>
+          <div className="mx-auto mb-4 h-10 w-10 animate-spin rounded-full border-[3px] border-indigo-200 border-t-indigo-600 dark:border-indigo-900 dark:border-t-indigo-400" />
+          <p className="text-sm text-muted-foreground">Loading your workspace…</p>
         </div>
       </div>
     )

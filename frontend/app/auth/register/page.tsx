@@ -27,7 +27,7 @@ export default function RegisterPage() {
       toast.success('Account created successfully!')
       // Small delay to ensure auth provider updates
       setTimeout(() => {
-        router.push('/')
+        router.push('/dashboard')
       }, 100)
     },
     onError: (error: any) => {

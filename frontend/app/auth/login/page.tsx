@@ -26,7 +26,7 @@ export default function LoginPage() {
       toast.success('Welcome back!')
       // Small delay to ensure auth provider updates
       setTimeout(() => {
-        router.push('/')
+        router.push('/dashboard')
       }, 100)
     },
     onError: (error: any) => {

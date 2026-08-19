@@ -107,3 +107,6 @@ frontend/out/
 
 # Additional cleanup files
 *.DS_Store
+*.db-wal
+*.db-shm
+tsconfig.tsbuildinfo

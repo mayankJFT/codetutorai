@@ -1,162 +1,132 @@
 'use client'
 
-import { motion, AnimatePresence } from 'framer-motion'
-import { 
-  Home, 
-  FolderOpen, 
-  Settings, 
-  History, 
-  BookOpen,
-  ChevronLeft,
-  ChevronRight,
-  Plus,
-  Github,
-  HardDrive,
-  Sparkles,
-  Play
-} from 'lucide-react'
-import { cn } from '@/lib/utils'
+import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
+import { motion } from 'framer-motion'
+import { LogOut, PanelLeftClose, PanelLeftOpen, Plus, Sparkles } from 'lucide-react'
+import { NAV_ITEMS } from '@/lib/nav'
+import { cn } from '@/lib/utils'
+import { Button } from '@/components/ui/button'
+import { Avatar } from '@/components/ui/avatar'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { useAuth } from '@/components/auth-provider'
+import { useSidebar } from './app-shell'
 
-interface SidebarProps {
-  open: boolean
-  onToggle: () => void
+export function Logo({ collapsed = false, href = '/dashboard' }: { collapsed?: boolean; href?: string }) {
+  return (
+    <Link href={href} className="flex items-center gap-2.5">
+      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-gradient-primary text-white shadow-soft">
+        <Sparkles className="h-4 w-4" />
+      </span>
+      {!collapsed && <span className="text-[15px] font-semibold tracking-tight">CodeTutor AI</span>}
+    </Link>
+  )
 }
 
-const menuItems = [
-  { icon: Home, label: 'Dashboard', href: '/' },
-  { icon: FolderOpen, label: 'Projects', href: '/projects' },
-  { icon: History, label: 'History', href: '/history' },
-  { icon: BookOpen, label: 'Tutorials', href: '/tutorials' },
-  { icon: Settings, label: 'Settings', href: '/settings' },
-]
-
-export function Sidebar({ open, onToggle }: SidebarProps) {
+export function NavLinks({ collapsed = false, onNavigate }: { collapsed?: boolean; onNavigate?: () => void }) {
   const pathname = usePathname()
-  const router = useRouter()
-
   return (
-    <AnimatePresence mode="wait">
-      <motion.aside
-        initial={{ width: open ? 280 : 80 }}
-        animate={{ width: open ? 280 : 80 }}
-        transition={{ duration: 0.3, ease: 'easeInOut' }}
-        className="relative bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex flex-col"
-      >
-        {/* Logo Section */}
-        <div className="h-16 flex items-center justify-between px-4 border-b border-slate-200 dark:border-slate-800">
-          <motion.div 
-            className="flex items-center gap-3"
-            animate={{ justifyContent: open ? 'flex-start' : 'center' }}
-          >
-            <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
-              <Sparkles className="w-6 h-6 text-white" />
-            </div>
-            <AnimatePresence>
-              {open && (
-                <motion.div
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -20 }}
-                  transition={{ duration: 0.2 }}
-                >
-                  <h1 className="font-bold text-xl tracking-tight">CODETUTOR AI</h1>
-                  <p className="text-xs text-slate-500 dark:text-slate-400">Advanced Code Learning</p>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </motion.div>
-        </div>
-
-        {/* New Project Button */}
-        <div className="p-4">
-          <motion.button
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            onClick={() => router.push('/new-project')}
+    <nav className="flex-1 space-y-1 px-3 py-2">
+      {NAV_ITEMS.map(({ label, href, icon: Icon }) => {
+        const active = pathname === href || pathname.startsWith(href + '/')
+        const link = (
+          <Link
+            key={href}
+            href={href}
+            onClick={onNavigate}
             className={cn(
-              "w-full flex items-center gap-3 px-4 py-3 rounded-lg",
-              "bg-gradient-to-r from-blue-500 to-purple-600 text-white",
-              "hover:from-blue-600 hover:to-purple-700 transition-all",
-              "shadow-lg hover:shadow-xl",
-              !open && "justify-center px-3"
+              'relative flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground',
+              active && 'text-foreground hover:bg-transparent',
+              collapsed && 'justify-center px-0'
             )}
           >
-            <Plus className="w-5 h-5" />
-            {open && <span className="font-semibold">New Project</span>}
-          </motion.button>
-        </div>
+            {active && (
+              <motion.span
+                layoutId="sidebar-active"
+                className="absolute inset-0 rounded-lg bg-accent"
+                transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+              />
+            )}
+            <Icon className={cn('relative z-10 h-4 w-4', active && 'text-primary dark:text-accent-foreground')} />
+            {!collapsed && <span className={cn('relative z-10', active && 'text-accent-foreground')}>{label}</span>}
+          </Link>
+        )
+        return collapsed ? (
+          <Tooltip key={href}>
+            <TooltipTrigger asChild>{link}</TooltipTrigger>
+            <TooltipContent side="right">{label}</TooltipContent>
+          </Tooltip>
+        ) : (
+          link
+        )
+      })}
+    </nav>
+  )
+}
 
-        {/* Quick Actions */}
-        {open && (
-          <div className="px-4 mb-4">
-            <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-2 uppercase tracking-wider">
-              Quick Start
-            </p>
-            <div className="space-y-2">
-              <button className="w-full flex items-center gap-2 px-3 py-2 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">
-                <Github className="w-4 h-4" />
-                <span className="text-sm">From GitHub</span>
-              </button>
-              <button className="w-full flex items-center gap-2 px-3 py-2 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">
-                <HardDrive className="w-4 h-4" />
-                <span className="text-sm">Local Directory</span>
-              </button>
-            </div>
+export function Sidebar() {
+  const router = useRouter()
+  const { collapsed, toggle } = useSidebar()
+  const { user, logout } = useAuth()
+
+  return (
+    <aside
+      className={cn(
+        'sticky top-0 hidden h-screen shrink-0 flex-col border-r border-border bg-card transition-[width] duration-200 lg:flex',
+        collapsed ? 'w-[72px]' : 'w-64'
+      )}
+    >
+      <div className={cn('flex h-16 items-center px-4', collapsed && 'justify-center px-0')}>
+        <Logo collapsed={collapsed} />
+      </div>
+
+      <div className={cn('px-3 pb-2', collapsed && 'px-2')}>
+        {collapsed ? (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button variant="gradient" size="icon" className="w-full" onClick={() => router.push('/new-project')} aria-label="New project">
+                <Plus className="h-4 w-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent side="right">New project</TooltipContent>
+          </Tooltip>
+        ) : (
+          <Button variant="gradient" className="w-full" onClick={() => router.push('/new-project')}>
+            <Plus className="h-4 w-4" />
+            New Project
+          </Button>
+        )}
+      </div>
+
+      <NavLinks collapsed={collapsed} />
+
+      <div className="border-t border-border p-3">
+        {user && (
+          <div className={cn('flex items-center gap-3 rounded-lg p-2', collapsed && 'justify-center')}>
+            <Avatar name={user.full_name} size="sm" />
+            {!collapsed && (
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-sm font-medium">{user.full_name}</p>
+                <p className="truncate text-xs text-muted-foreground">{user.email}</p>
+              </div>
+            )}
+            {!collapsed && (
+              <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground" onClick={logout} aria-label="Sign out">
+                <LogOut className="h-4 w-4" />
+              </Button>
+            )}
           </div>
         )}
-
-        {/* Navigation Menu */}
-        <nav className="flex-1 px-4">
-          {open && (
-            <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-2 uppercase tracking-wider">
-              Navigation
-            </p>
-          )}
-          <ul className="space-y-1">
-            {menuItems.map((item) => {
-              const Icon = item.icon
-              const isActive = pathname === item.href
-              
-              return (
-                <li key={item.href}>
-                  <button
-                    onClick={() => router.push(item.href)}
-                    className={cn(
-                      "w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all",
-                      "hover:bg-slate-100 dark:hover:bg-slate-800",
-                      isActive && "bg-slate-100 dark:bg-slate-800 text-blue-600 dark:text-blue-400",
-                      !open && "justify-center"
-                    )}
-                  >
-                    <Icon className={cn("w-5 h-5", isActive && "text-blue-600 dark:text-blue-400")} />
-                    {open && (
-                      <span className={cn(
-                        "font-medium",
-                        isActive && "text-blue-600 dark:text-blue-400"
-                      )}>
-                        {item.label}
-                      </span>
-                    )}
-                  </button>
-                </li>
-              )
-            })}
-          </ul>
-        </nav>
-
-        {/* Toggle Button */}
-        <button
-          onClick={onToggle}
-          className="absolute -right-3 top-20 w-6 h-6 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-full flex items-center justify-center shadow-sm hover:shadow-md transition-shadow"
-        >
-          {open ? (
-            <ChevronLeft className="w-3 h-3" />
+        <Button variant="ghost" size="sm" className="mt-1 w-full justify-center text-muted-foreground" onClick={toggle} aria-label="Toggle sidebar">
+          {collapsed ? (
+            <PanelLeftOpen className="h-4 w-4" />
           ) : (
-            <ChevronRight className="w-3 h-3" />
+            <>
+              <PanelLeftClose className="h-4 w-4" /> Collapse
+            </>
           )}
-        </button>
-      </motion.aside>
-    </AnimatePresence>
+        </Button>
+      </div>
+    </aside>
   )
 }

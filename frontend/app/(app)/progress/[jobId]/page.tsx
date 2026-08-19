@@ -161,7 +161,7 @@ export default function ProgressPage() {
   }
 
   const handleGoHome = () => {
-    router.push('/')
+    router.push('/dashboard')
   }
 
   const handleNewProject = () => {
@@ -232,7 +232,7 @@ export default function ProgressPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-slate-950 dark:to-blue-950 flex items-center justify-center">
+      <div className="flex items-center justify-center py-24">
         <div className="text-center">
           <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
           <p className="text-slate-600 dark:text-slate-400">Loading job status...</p>
@@ -243,7 +243,7 @@ export default function ProgressPage() {
 
   if (error || !jobStatus) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-slate-950 dark:to-blue-950 flex items-center justify-center">
+      <div className="flex items-center justify-center py-24">
         <div className="text-center">
           <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
           <p className="text-slate-600 dark:text-slate-400 mb-4">Failed to load job status</p>
@@ -259,7 +259,7 @@ export default function ProgressPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-slate-950 dark:to-blue-950">
+    <div className="">
       {/* Header */}
       <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-lg border-b border-slate-200 dark:border-slate-800">
         <div className="max-w-4xl mx-auto px-6 py-4">
