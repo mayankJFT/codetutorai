@@ -61,10 +61,10 @@ export default function RegisterPage() {
           <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl mb-4">
             <Sparkles className="w-8 h-8 text-white" />
           </div>
-          <h1 className="text-3xl font-barlow font-bold tracking-tight mb-2">
+          <h1 className="text-3xl font-bold tracking-tight mb-2">
             Create Account
           </h1>
-          <p className="text-slate-600 dark:text-slate-400 font-barlow">
+          <p className="text-slate-600 dark:text-slate-400">
             Join CodeTutor AI to generate amazing tutorials from any codebase
           </p>
         </div>
@@ -79,7 +79,7 @@ export default function RegisterPage() {
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Full Name Field */}
             <div>
-              <label htmlFor="full_name" className="block text-sm font-barlow font-semibold mb-2">
+              <label htmlFor="full_name" className="block text-sm font-semibold mb-2">
                 Full Name
               </label>
               <div className="relative">
@@ -88,7 +88,7 @@ export default function RegisterPage() {
                   type="text"
                   value={formData.full_name}
                   onChange={(e) => setFormData(prev => ({ ...prev, full_name: e.target.value }))}
-                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg font-barlow placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all pl-11"
+                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all pl-11"
                   placeholder="Enter your full name"
                   disabled={registerMutation.isPending}
                 />
@@ -98,7 +98,7 @@ export default function RegisterPage() {
 
             {/* Email Field */}
             <div>
-              <label htmlFor="email" className="block text-sm font-barlow font-semibold mb-2">
+              <label htmlFor="email" className="block text-sm font-semibold mb-2">
                 Email Address
               </label>
               <input
@@ -106,7 +106,7 @@ export default function RegisterPage() {
                 type="email"
                 value={formData.email}
                 onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
-                className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg font-barlow placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                 placeholder="Enter your email"
                 disabled={registerMutation.isPending}
               />
@@ -114,7 +114,7 @@ export default function RegisterPage() {
 
             {/* Password Field */}
             <div>
-              <label htmlFor="password" className="block text-sm font-barlow font-semibold mb-2">
+              <label htmlFor="password" className="block text-sm font-semibold mb-2">
                 Password
               </label>
               <div className="relative">
@@ -123,7 +123,7 @@ export default function RegisterPage() {
                   type={showPassword ? 'text' : 'password'}
                   value={formData.password}
                   onChange={(e) => setFormData(prev => ({ ...prev, password: e.target.value }))}
-                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg font-barlow placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all pr-12"
+                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all pr-12"
                   placeholder="Create a strong password"
                   disabled={registerMutation.isPending}
                 />
@@ -135,7 +135,7 @@ export default function RegisterPage() {
                   {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                 </button>
               </div>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 font-barlow">
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
                 Password must be at least 6 characters long
               </p>
             </div>
@@ -144,7 +144,7 @@ export default function RegisterPage() {
             <button
               type="submit"
               disabled={registerMutation.isPending}
-              className="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-barlow font-semibold py-3 px-6 rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              className="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-semibold py-3 px-6 rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
               {registerMutation.isPending ? (
                 <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -163,7 +163,7 @@ export default function RegisterPage() {
               <div className="w-full border-t border-slate-200 dark:border-slate-700" />
             </div>
             <div className="relative flex justify-center text-sm">
-              <span className="px-4 bg-white dark:bg-slate-900 text-slate-500 dark:text-slate-400 font-barlow">
+              <span className="px-4 bg-white dark:bg-slate-900 text-slate-500 dark:text-slate-400">
                 Already have an account?
               </span>
             </div>
@@ -172,7 +172,7 @@ export default function RegisterPage() {
           {/* Sign In Link */}
           <Link
             href="/auth/login"
-            className="block w-full text-center py-3 px-6 border border-slate-200 dark:border-slate-700 rounded-lg font-barlow font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all duration-200"
+            className="block w-full text-center py-3 px-6 border border-slate-200 dark:border-slate-700 rounded-lg font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all duration-200"
           >
             Sign In Instead
           </Link>
@@ -180,7 +180,7 @@ export default function RegisterPage() {
 
         {/* Footer */}
         <div className="text-center mt-8">
-          <p className="text-sm text-slate-500 dark:text-slate-400 font-barlow">
+          <p className="text-sm text-slate-500 dark:text-slate-400">
             By creating an account, you agree to our Terms of Service and Privacy Policy
           </p>
         </div>

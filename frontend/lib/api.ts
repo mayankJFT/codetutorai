@@ -23,9 +23,15 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
+    const url: string = error.config?.url || ''
+    const isAuthAttempt = url.includes('/auth/login') || url.includes('/auth/register')
+    // A 401 from login/register means bad credentials: let the form show the
+    // error. Only treat 401s on other routes as an expired/invalid session.
+    if (error.response?.status === 401 && !isAuthAttempt) {
       Cookies.remove('access_token')
-      window.location.href = '/auth/login'
+      if (!window.location.pathname.startsWith('/auth/')) {
+        window.location.href = '/auth/login'
+      }
     }
     return Promise.reject(error)
   }

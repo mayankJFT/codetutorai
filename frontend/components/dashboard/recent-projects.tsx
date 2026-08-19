@@ -34,8 +34,8 @@ export function RecentProjects() {
         className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800"
       >
         <div className="p-6 border-b border-slate-200 dark:border-slate-800">
-          <h2 className="text-xl font-barlow font-bold">Recent Projects</h2>
-          <p className="text-sm text-slate-600 dark:text-slate-400 font-barlow">
+          <h2 className="text-xl font-bold">Recent Projects</h2>
+          <p className="text-sm text-slate-600 dark:text-slate-400">
             Your latest tutorial generation projects
           </p>
         </div>
@@ -63,8 +63,8 @@ export function RecentProjects() {
       className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800"
     >
       <div className="p-6 border-b border-slate-200 dark:border-slate-800">
-        <h2 className="text-xl font-barlow font-bold">Recent Projects</h2>
-        <p className="text-sm text-slate-600 dark:text-slate-400 font-barlow">
+        <h2 className="text-xl font-bold">Recent Projects</h2>
+        <p className="text-sm text-slate-600 dark:text-slate-400">
           Your latest tutorial generation projects
         </p>
       </div>
@@ -72,7 +72,7 @@ export function RecentProjects() {
       <div className="divide-y divide-slate-200 dark:divide-slate-800">
         {recentProjects.length === 0 ? (
           <div className="p-8 text-center">
-            <p className="text-slate-500 dark:text-slate-400 font-barlow">
+            <p className="text-slate-500 dark:text-slate-400">
               No projects yet. Create your first tutorial!
             </p>
           </div>
@@ -93,16 +93,16 @@ export function RecentProjects() {
                     )}
                   </div>
                   <div>
-                    <h3 className="font-barlow font-semibold text-lg">{project.name}</h3>
-                    <p className="text-sm text-slate-600 dark:text-slate-400 font-barlow">
+                    <h3 className="font-semibold text-lg">{project.name}</h3>
+                    <p className="text-sm text-slate-600 dark:text-slate-400">
                       {project.source}
                     </p>
                     <div className="flex items-center gap-4 mt-2">
-                      <span className="text-xs text-slate-500 dark:text-slate-400 font-barlow">
+                      <span className="text-xs text-slate-500 dark:text-slate-400">
                         {formatDate(project.created_at)}
                       </span>
                       {project.config?.language && (
-                        <span className="text-xs px-2 py-1 bg-slate-100 dark:bg-slate-800 rounded-md font-barlow">
+                        <span className="text-xs px-2 py-1 bg-slate-100 dark:bg-slate-800 rounded-md">
                           {project.config.language}
                         </span>
                       )}
@@ -124,7 +124,7 @@ export function RecentProjects() {
                     {project.status === 'completed' && (
                       <>
                         <CheckCircle className="w-4 h-4 text-green-600 dark:text-green-400" />
-                        <span className="text-sm font-barlow text-green-600 dark:text-green-400">
+                        <span className="text-sm text-green-600 dark:text-green-400">
                           Completed
                         </span>
                       </>
@@ -132,7 +132,7 @@ export function RecentProjects() {
                     {(project.status === 'processing' || project.status === 'pending') && (
                       <>
                         <Clock className="w-4 h-4 text-yellow-600 dark:text-yellow-400" />
-                        <span className="text-sm font-barlow text-yellow-600 dark:text-yellow-400">
+                        <span className="text-sm text-yellow-600 dark:text-yellow-400">
                           {project.current_step || (project.status === 'pending' ? 'Pending' : 'Processing')}
                         </span>
                       </>
@@ -140,13 +140,13 @@ export function RecentProjects() {
                     {project.status === 'failed' && (
                       <>
                         <XCircle className="w-4 h-4 text-red-600 dark:text-red-400" />
-                        <span className="text-sm font-barlow text-red-600 dark:text-red-400">
+                        <span className="text-sm text-red-600 dark:text-red-400">
                           {project.error || 'Failed'}
                         </span>
                       </>
                     )}
                   </div>
-                  <span className="text-sm font-barlow font-semibold">
+                  <span className="text-sm font-semibold">
                     {Math.min(project.progress || 0, 100)}%
                   </span>
                 </div>
@@ -173,7 +173,7 @@ export function RecentProjects() {
       <div className="p-4 border-t border-slate-200 dark:border-slate-800">
         <button 
           onClick={() => router.push('/projects')}
-          className="w-full py-2 text-sm font-barlow font-semibold text-blue-600 dark:text-blue-400 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg transition-colors"
+          className="w-full py-2 text-sm font-semibold text-blue-600 dark:text-blue-400 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg transition-colors"
         >
           View All Projects
         </button>

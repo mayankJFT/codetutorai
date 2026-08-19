@@ -221,8 +221,8 @@ export default function SettingsPage() {
               <Settings className="w-5 h-5 text-white" />
             </div>
             <div>
-              <h1 className="text-3xl font-barlow font-bold tracking-tight">Settings</h1>
-              <p className="text-slate-600 dark:text-slate-400 font-barlow">
+              <h1 className="text-3xl font-bold tracking-tight">Settings</h1>
+              <p className="text-slate-600 dark:text-slate-400">
                 Manage your account and application preferences
               </p>
             </div>
@@ -233,28 +233,28 @@ export default function SettingsPage() {
           <Tabs.List className="flex bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-1 mb-8 overflow-x-auto">
             <Tabs.Trigger
               value="profile"
-              className="flex items-center gap-2 px-4 py-2 rounded-md font-barlow font-semibold transition-all data-[state=active]:bg-slate-100 data-[state=active]:dark:bg-slate-800 whitespace-nowrap"
+              className="flex items-center gap-2 px-4 py-2 rounded-md font-semibold transition-all data-[state=active]:bg-slate-100 data-[state=active]:dark:bg-slate-800 whitespace-nowrap"
             >
               <User className="w-4 h-4" />
               Profile
             </Tabs.Trigger>
             <Tabs.Trigger
               value="preferences"
-              className="flex items-center gap-2 px-4 py-2 rounded-md font-barlow font-semibold transition-all data-[state=active]:bg-slate-100 data-[state=active]:dark:bg-slate-800 whitespace-nowrap"
+              className="flex items-center gap-2 px-4 py-2 rounded-md font-semibold transition-all data-[state=active]:bg-slate-100 data-[state=active]:dark:bg-slate-800 whitespace-nowrap"
             >
               <Globe className="w-4 h-4" />
               Preferences
             </Tabs.Trigger>
             <Tabs.Trigger
               value="generation"
-              className="flex items-center gap-2 px-4 py-2 rounded-md font-barlow font-semibold transition-all data-[state=active]:bg-slate-100 data-[state=active]:dark:bg-slate-800 whitespace-nowrap"
+              className="flex items-center gap-2 px-4 py-2 rounded-md font-semibold transition-all data-[state=active]:bg-slate-100 data-[state=active]:dark:bg-slate-800 whitespace-nowrap"
             >
               <FileText className="w-4 h-4" />
               Generation
             </Tabs.Trigger>
             <Tabs.Trigger
               value="integrations"
-              className="flex items-center gap-2 px-4 py-2 rounded-md font-barlow font-semibold transition-all data-[state=active]:bg-slate-100 data-[state=active]:dark:bg-slate-800 whitespace-nowrap"
+              className="flex items-center gap-2 px-4 py-2 rounded-md font-semibold transition-all data-[state=active]:bg-slate-100 data-[state=active]:dark:bg-slate-800 whitespace-nowrap"
             >
               <Github className="w-4 h-4" />
               Integrations
@@ -264,7 +264,7 @@ export default function SettingsPage() {
           {/* Profile Tab */}
           <Tabs.Content value="profile">
             <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-6">
-              <h2 className="text-xl font-barlow font-semibold mb-6 flex items-center gap-2">
+              <h2 className="text-xl font-semibold mb-6 flex items-center gap-2">
                 <User className="w-5 h-5" />
                 Profile Information
               </h2>
@@ -272,41 +272,41 @@ export default function SettingsPage() {
               <form onSubmit={handleProfileSubmit} className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <label className="block text-sm font-barlow font-semibold mb-2">
+                    <label className="block text-sm font-semibold mb-2">
                       Full Name
                     </label>
                     <input
                       type="text"
                       value={userSettings.full_name}
                       onChange={(e) => setUserSettings(prev => ({ ...prev, full_name: e.target.value }))}
-                      className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg font-barlow focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       placeholder="Your full name"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-barlow font-semibold mb-2">
+                    <label className="block text-sm font-semibold mb-2">
                       Email Address
                     </label>
                     <input
                       type="email"
                       value={userSettings.email}
                       onChange={(e) => setUserSettings(prev => ({ ...prev, email: e.target.value }))}
-                      className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg font-barlow focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       placeholder="your.email@example.com"
                     />
                   </div>
                 </div>
 
                 <div className="border-t border-slate-200 dark:border-slate-700 pt-6">
-                  <h3 className="text-lg font-barlow font-semibold mb-4 flex items-center gap-2">
+                  <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
                     <Lock className="w-4 h-4" />
                     Change Password
                   </h3>
                   
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
-                      <label className="block text-sm font-barlow font-semibold mb-2">
+                      <label className="block text-sm font-semibold mb-2">
                         Current Password
                       </label>
                       <div className="relative">
@@ -314,7 +314,7 @@ export default function SettingsPage() {
                           type={showCurrentPassword ? 'text' : 'password'}
                           value={userSettings.current_password}
                           onChange={(e) => setUserSettings(prev => ({ ...prev, current_password: e.target.value }))}
-                          className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg font-barlow focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent pr-10"
+                          className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent pr-10"
                           placeholder="••••••••"
                         />
                         <button
@@ -328,7 +328,7 @@ export default function SettingsPage() {
                     </div>
 
                     <div>
-                      <label className="block text-sm font-barlow font-semibold mb-2">
+                      <label className="block text-sm font-semibold mb-2">
                         New Password
                       </label>
                       <div className="relative">
@@ -336,7 +336,7 @@ export default function SettingsPage() {
                           type={showNewPassword ? 'text' : 'password'}
                           value={userSettings.new_password}
                           onChange={(e) => setUserSettings(prev => ({ ...prev, new_password: e.target.value }))}
-                          className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg font-barlow focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent pr-10"
+                          className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent pr-10"
                           placeholder="••••••••"
                         />
                         <button
@@ -350,7 +350,7 @@ export default function SettingsPage() {
                     </div>
 
                     <div>
-                      <label className="block text-sm font-barlow font-semibold mb-2">
+                      <label className="block text-sm font-semibold mb-2">
                         Confirm Password
                       </label>
                       <div className="relative">
@@ -358,7 +358,7 @@ export default function SettingsPage() {
                           type={showConfirmPassword ? 'text' : 'password'}
                           value={userSettings.confirm_password}
                           onChange={(e) => setUserSettings(prev => ({ ...prev, confirm_password: e.target.value }))}
-                          className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg font-barlow focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent pr-10"
+                          className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent pr-10"
                           placeholder="••••••••"
                         />
                         <button
@@ -377,7 +377,7 @@ export default function SettingsPage() {
                   <button
                     type="submit"
                     disabled={updateProfileMutation.isPending}
-                    className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-lg font-barlow font-semibold hover:from-emerald-600 hover:to-teal-700 transition-all disabled:opacity-50"
+                    className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-lg font-semibold hover:from-emerald-600 hover:to-teal-700 transition-all disabled:opacity-50"
                   >
                     {updateProfileMutation.isPending ? (
                       <>
@@ -400,7 +400,7 @@ export default function SettingsPage() {
           <Tabs.Content value="preferences">
             <div className="space-y-6">
               <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-6">
-                <h2 className="text-xl font-barlow font-semibold mb-6 flex items-center gap-2">
+                <h2 className="text-xl font-semibold mb-6 flex items-center gap-2">
                   <Palette className="w-5 h-5" />
                   Appearance & Behavior
                 </h2>
@@ -408,15 +408,15 @@ export default function SettingsPage() {
                 <div className="space-y-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <label className="text-sm font-barlow font-semibold">Theme</label>
-                      <p className="text-xs text-slate-500 dark:text-slate-400 font-barlow">
+                      <label className="text-sm font-semibold">Theme</label>
+                      <p className="text-xs text-slate-500 dark:text-slate-400">
                         Choose your preferred theme
                       </p>
                     </div>
                     <select
                       value={appSettings.theme}
                       onChange={(e) => setAppSettings(prev => ({ ...prev, theme: e.target.value as 'light' | 'dark' | 'system' }))}
-                      className="px-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg font-barlow focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="px-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     >
                       <option value="light">Light</option>
                       <option value="dark">Dark</option>
@@ -426,8 +426,8 @@ export default function SettingsPage() {
 
                   <div className="flex items-center justify-between">
                     <div>
-                      <label className="text-sm font-barlow font-semibold">Auto-save Projects</label>
-                      <p className="text-xs text-slate-500 dark:text-slate-400 font-barlow">
+                      <label className="text-sm font-semibold">Auto-save Projects</label>
+                      <p className="text-xs text-slate-500 dark:text-slate-400">
                         Automatically save project configurations
                       </p>
                     </div>
@@ -442,8 +442,8 @@ export default function SettingsPage() {
 
                   <div className="flex items-center justify-between">
                     <div>
-                      <label className="text-sm font-barlow font-semibold">Notifications</label>
-                      <p className="text-xs text-slate-500 dark:text-slate-400 font-barlow">
+                      <label className="text-sm font-semibold">Notifications</label>
+                      <p className="text-xs text-slate-500 dark:text-slate-400">
                         Receive notifications for completed tutorials
                       </p>
                     </div>
@@ -459,7 +459,7 @@ export default function SettingsPage() {
               </div>
 
               <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-6">
-                <h2 className="text-xl font-barlow font-semibold mb-6 flex items-center gap-2">
+                <h2 className="text-xl font-semibold mb-6 flex items-center gap-2">
                   <Database className="w-5 h-5" />
                   Import & Export
                 </h2>
@@ -467,13 +467,13 @@ export default function SettingsPage() {
                 <div className="flex flex-col md:flex-row gap-4">
                   <button
                     onClick={exportSettings}
-                    className="flex items-center justify-center gap-2 px-6 py-3 border border-slate-200 dark:border-slate-700 rounded-lg font-barlow font-semibold hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
+                    className="flex items-center justify-center gap-2 px-6 py-3 border border-slate-200 dark:border-slate-700 rounded-lg font-semibold hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
                   >
                     <Download className="w-4 h-4" />
                     Export Settings
                   </button>
                   
-                  <label className="flex items-center justify-center gap-2 px-6 py-3 border border-slate-200 dark:border-slate-700 rounded-lg font-barlow font-semibold hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors cursor-pointer">
+                  <label className="flex items-center justify-center gap-2 px-6 py-3 border border-slate-200 dark:border-slate-700 rounded-lg font-semibold hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors cursor-pointer">
                     <Upload className="w-4 h-4" />
                     Import Settings
                     <input
@@ -491,7 +491,7 @@ export default function SettingsPage() {
           {/* Generation Tab */}
           <Tabs.Content value="generation">
             <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-6">
-              <h2 className="text-xl font-barlow font-semibold mb-6 flex items-center gap-2">
+              <h2 className="text-xl font-semibold mb-6 flex items-center gap-2">
                 <FileText className="w-5 h-5" />
                 Tutorial Generation Settings
               </h2>
@@ -499,13 +499,13 @@ export default function SettingsPage() {
               <form onSubmit={handleSettingsSubmit} className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <label className="block text-sm font-barlow font-semibold mb-2">
+                    <label className="block text-sm font-semibold mb-2">
                       Default Language
                     </label>
                     <select
                       value={appSettings.default_language}
                       onChange={(e) => setAppSettings(prev => ({ ...prev, default_language: e.target.value }))}
-                      className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg font-barlow focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     >
                       {LANGUAGES.map(lang => (
                         <option key={lang} value={lang}>
@@ -516,7 +516,7 @@ export default function SettingsPage() {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-barlow font-semibold mb-2">
+                    <label className="block text-sm font-semibold mb-2">
                       Max File Size (bytes)
                     </label>
                     <input
@@ -525,12 +525,12 @@ export default function SettingsPage() {
                       max="1000000"
                       value={Number.isNaN(appSettings.max_file_size) ? 100000 : appSettings.max_file_size}
                       onChange={(e) => setAppSettings(prev => ({ ...prev, max_file_size: parseInt(e.target.value) || 100000 }))}
-                      className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg font-barlow focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-barlow font-semibold mb-2">
+                    <label className="block text-sm font-semibold mb-2">
                       Max Abstractions
                     </label>
                     <input
@@ -539,14 +539,14 @@ export default function SettingsPage() {
                       max="50"
                       value={Number.isNaN(appSettings.max_abstractions) ? 10 : appSettings.max_abstractions}
                       onChange={(e) => setAppSettings(prev => ({ ...prev, max_abstractions: parseInt(e.target.value) || 10 }))}
-                      className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg font-barlow focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     />
                   </div>
 
                   <div className="flex items-center justify-between">
                     <div>
-                      <label className="text-sm font-barlow font-semibold">Enable LLM Caching</label>
-                      <p className="text-xs text-slate-500 dark:text-slate-400 font-barlow">
+                      <label className="text-sm font-semibold">Enable LLM Caching</label>
+                      <p className="text-xs text-slate-500 dark:text-slate-400">
                         Cache LLM responses to speed up generation
                       </p>
                     </div>
@@ -564,7 +564,7 @@ export default function SettingsPage() {
                   <button
                     type="submit"
                     disabled={updateSettingsMutation.isPending}
-                    className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-lg font-barlow font-semibold hover:from-emerald-600 hover:to-teal-700 transition-all disabled:opacity-50"
+                    className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-lg font-semibold hover:from-emerald-600 hover:to-teal-700 transition-all disabled:opacity-50"
                   >
                     {updateSettingsMutation.isPending ? (
                       <>
@@ -586,14 +586,14 @@ export default function SettingsPage() {
           {/* Integrations Tab */}
           <Tabs.Content value="integrations">
             <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-6">
-              <h2 className="text-xl font-barlow font-semibold mb-6 flex items-center gap-2">
+              <h2 className="text-xl font-semibold mb-6 flex items-center gap-2">
                 <Github className="w-5 h-5" />
                 External Integrations
               </h2>
 
               <div className="space-y-6">
                 <div>
-                  <label className="block text-sm font-barlow font-semibold mb-2">
+                  <label className="block text-sm font-semibold mb-2">
                     GitHub Personal Access Token
                   </label>
                   <input
@@ -601,12 +601,12 @@ export default function SettingsPage() {
                     value={appSettings.github_token}
                     onChange={(e) => setAppSettings(prev => ({ ...prev, github_token: e.target.value }))}
                     placeholder="ghp_xxxxxxxxxxxxxxxxxxxx"
-                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg font-barlow focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
                   <div className="mt-2 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
                     <div className="flex items-start gap-2">
                       <AlertCircle className="w-4 h-4 text-blue-600 dark:text-blue-400 mt-0.5 shrink-0" />
-                      <div className="text-sm text-blue-700 dark:text-blue-300 font-barlow">
+                      <div className="text-sm text-blue-700 dark:text-blue-300">
                         <p className="font-semibold mb-1">Required for:</p>
                         <ul className="text-xs space-y-0.5 ml-4">
                           <li>• Accessing private repositories</li>
@@ -617,7 +617,7 @@ export default function SettingsPage() {
                     </div>
                   </div>
                   {settings?.github_token_configured && (
-                    <div className="mt-2 flex items-center gap-2 text-sm text-green-600 dark:text-green-400 font-barlow">
+                    <div className="mt-2 flex items-center gap-2 text-sm text-green-600 dark:text-green-400">
                       <Check className="w-4 h-4" />
                       GitHub token is configured
                     </div>
@@ -628,7 +628,7 @@ export default function SettingsPage() {
                   <button
                     onClick={() => updateSettingsMutation.mutate(appSettings)}
                     disabled={updateSettingsMutation.isPending}
-                    className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-lg font-barlow font-semibold hover:from-emerald-600 hover:to-teal-700 transition-all disabled:opacity-50"
+                    className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-lg font-semibold hover:from-emerald-600 hover:to-teal-700 transition-all disabled:opacity-50"
                   >
                     {updateSettingsMutation.isPending ? (
                       <>

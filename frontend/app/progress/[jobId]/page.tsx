@@ -235,7 +235,7 @@ export default function ProgressPage() {
       <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-slate-950 dark:to-blue-950 flex items-center justify-center">
         <div className="text-center">
           <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-slate-600 dark:text-slate-400 font-barlow">Loading job status...</p>
+          <p className="text-slate-600 dark:text-slate-400">Loading job status...</p>
         </div>
       </div>
     )
@@ -246,10 +246,10 @@ export default function ProgressPage() {
       <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-slate-950 dark:to-blue-950 flex items-center justify-center">
         <div className="text-center">
           <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
-          <p className="text-slate-600 dark:text-slate-400 font-barlow mb-4">Failed to load job status</p>
+          <p className="text-slate-600 dark:text-slate-400 mb-4">Failed to load job status</p>
           <button
             onClick={() => router.push('/projects')}
-            className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-barlow transition-colors"
+            className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors"
           >
             Back to Projects
           </button>
@@ -276,12 +276,12 @@ export default function ProgressPage() {
               <ChevronRight className="w-4 h-4 text-slate-400" />
               <button
                 onClick={() => router.push('/projects')}
-                className="px-3 py-1 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors text-sm font-barlow"
+                className="px-3 py-1 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors text-sm"
               >
                 Projects
               </button>
               <ChevronRight className="w-4 h-4 text-slate-400" />
-              <span className="text-sm font-barlow text-slate-600 dark:text-slate-400">
+              <span className="text-sm text-slate-600 dark:text-slate-400">
                 Progress
               </span>
             </div>
@@ -300,8 +300,8 @@ export default function ProgressPage() {
           {/* Main Header */}
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-2xl font-barlow font-bold">Tutorial Generation Progress</h1>
-              <p className="text-sm text-slate-600 dark:text-slate-400 font-barlow">
+              <h1 className="text-2xl font-bold">Tutorial Generation Progress</h1>
+              <p className="text-sm text-slate-600 dark:text-slate-400">
                 Job ID: {jobId.substring(0, 8)}...
               </p>
             </div>
@@ -311,14 +311,14 @@ export default function ProgressPage() {
                 <>
                   <button
                     onClick={handleDownloadPDF}
-                    className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg font-barlow transition-colors flex items-center gap-2"
+                    className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors flex items-center gap-2"
                   >
                     <Download className="w-4 h-4" />
                     PDF
                   </button>
                   <button
                     onClick={handleViewProjects}
-                    className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-barlow transition-colors flex items-center gap-2"
+                    className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors flex items-center gap-2"
                   >
                     <Eye className="w-4 h-4" />
                     View Projects
@@ -329,7 +329,7 @@ export default function ProgressPage() {
               {jobStatus.status === 'failed' && (
                 <button
                   onClick={handleNewProject}
-                  className="px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg font-barlow transition-colors flex items-center gap-2"
+                  className="px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg transition-colors flex items-center gap-2"
                 >
                   <ArrowRight className="w-4 h-4" />
                   Try Again
@@ -339,7 +339,7 @@ export default function ProgressPage() {
               {jobStatus.status === 'pending' && (
                 <button
                   onClick={() => router.push('/projects')}
-                  className="px-4 py-2 bg-slate-500 hover:bg-slate-600 text-white rounded-lg font-barlow transition-colors flex items-center gap-2"
+                  className="px-4 py-2 bg-slate-500 hover:bg-slate-600 text-white rounded-lg transition-colors flex items-center gap-2"
                 >
                   <ArrowLeft className="w-4 h-4" />
                   Back to Projects
@@ -362,19 +362,19 @@ export default function ProgressPage() {
             <div className="flex items-center gap-4">
               {getStatusIcon()}
               <div>
-                <h2 className={`text-2xl font-barlow font-bold ${getStatusColor()}`}>
+                <h2 className={`text-2xl font-bold ${getStatusColor()}`}>
                   {jobStatus.status.charAt(0).toUpperCase() + jobStatus.status.slice(1)}
                 </h2>
                 {jobStatus.current_step && (
-                  <p className="text-lg text-slate-600 dark:text-slate-400 font-barlow mt-1">
+                  <p className="text-lg text-slate-600 dark:text-slate-400 mt-1">
                     {jobStatus.current_step}
                   </p>
                 )}
               </div>
             </div>
             <div className="text-right">
-              <div className="text-4xl font-barlow font-bold">{Math.min(jobStatus.progress || 0, 100)}%</div>
-              <div className="text-sm text-slate-500 dark:text-slate-400 font-barlow">Complete</div>
+              <div className="text-4xl font-bold">{Math.min(jobStatus.progress || 0, 100)}%</div>
+              <div className="text-sm text-slate-500 dark:text-slate-400">Complete</div>
             </div>
           </div>
 
@@ -395,17 +395,17 @@ export default function ProgressPage() {
               <div className="flex items-start gap-3">
                 <AlertCircle className="w-5 h-5 text-yellow-600 dark:text-yellow-400 mt-0.5" />
                 <div>
-                  <h3 className="font-barlow font-semibold text-yellow-700 dark:text-yellow-300 mb-1">
+                  <h3 className="font-semibold text-yellow-700 dark:text-yellow-300 mb-1">
                     Job May Be Taking Longer Than Expected
                   </h3>
-                  <p className="text-sm text-yellow-700 dark:text-yellow-300 font-barlow mb-3">
+                  <p className="text-sm text-yellow-700 dark:text-yellow-300 mb-3">
                     This job has been running for a while. The tutorial generation might have completed successfully. 
                     Try checking your projects page or refreshing manually.
                   </p>
                   <div className="flex gap-2">
                     <button
                       onClick={handleViewProjects}
-                      className="px-3 py-1 bg-yellow-600 hover:bg-yellow-700 text-white rounded text-sm font-barlow transition-colors"
+                      className="px-3 py-1 bg-yellow-600 hover:bg-yellow-700 text-white rounded text-sm transition-colors"
                     >
                       Check Projects
                     </button>
@@ -415,7 +415,7 @@ export default function ProgressPage() {
                         setAutoRefresh(true)
                         handleManualRefresh()
                       }}
-                      className="px-3 py-1 border border-yellow-600 text-yellow-600 hover:bg-yellow-50 dark:hover:bg-yellow-900/10 rounded text-sm font-barlow transition-colors"
+                      className="px-3 py-1 border border-yellow-600 text-yellow-600 hover:bg-yellow-50 dark:hover:bg-yellow-900/10 rounded text-sm transition-colors"
                     >
                       Continue Monitoring
                     </button>
@@ -431,10 +431,10 @@ export default function ProgressPage() {
               <div className="flex items-start gap-3">
                 <AlertCircle className="w-5 h-5 text-red-600 dark:text-red-400 mt-0.5" />
                 <div>
-                  <h3 className="font-barlow font-semibold text-red-700 dark:text-red-300 mb-1">
+                  <h3 className="font-semibold text-red-700 dark:text-red-300 mb-1">
                     Generation Failed
                   </h3>
-                  <p className="text-sm text-red-700 dark:text-red-300 font-barlow">
+                  <p className="text-sm text-red-700 dark:text-red-300">
                     {jobStatus.error}
                   </p>
                 </div>
@@ -448,27 +448,27 @@ export default function ProgressPage() {
               <div className="flex items-start gap-3">
                 <CheckCircle className="w-5 h-5 text-green-600 dark:text-green-400 mt-0.5" />
                 <div>
-                  <h3 className="font-barlow font-semibold text-green-700 dark:text-green-300 mb-2">
+                  <h3 className="font-semibold text-green-700 dark:text-green-300 mb-2">
                     Tutorial Generated Successfully!
                   </h3>
                   <div className="grid grid-cols-3 gap-4 text-sm">
                     <div className="bg-white dark:bg-slate-800 rounded-lg p-3 text-center">
-                      <div className="text-xl font-barlow font-bold text-blue-600 dark:text-blue-400">
+                      <div className="text-xl font-bold text-blue-600 dark:text-blue-400">
                         {jobStatus.result.abstractions?.length || 0}
                       </div>
-                      <div className="text-slate-600 dark:text-slate-400 font-barlow">Concepts</div>
+                      <div className="text-slate-600 dark:text-slate-400">Concepts</div>
                     </div>
                     <div className="bg-white dark:bg-slate-800 rounded-lg p-3 text-center">
-                      <div className="text-xl font-barlow font-bold text-purple-600 dark:text-purple-400">
+                      <div className="text-xl font-bold text-purple-600 dark:text-purple-400">
                         {jobStatus.result.chapters?.length || 0}
                       </div>
-                      <div className="text-slate-600 dark:text-slate-400 font-barlow">Chapters</div>
+                      <div className="text-slate-600 dark:text-slate-400">Chapters</div>
                     </div>
                     <div className="bg-white dark:bg-slate-800 rounded-lg p-3 text-center">
-                      <div className="text-xl font-barlow font-bold text-green-600 dark:text-green-400">
+                      <div className="text-xl font-bold text-green-600 dark:text-green-400">
                         100%
                       </div>
-                      <div className="text-slate-600 dark:text-slate-400 font-barlow">Complete</div>
+                      <div className="text-slate-600 dark:text-slate-400">Complete</div>
                     </div>
                   </div>
                 </div>
@@ -484,7 +484,7 @@ export default function ProgressPage() {
           transition={{ delay: 0.2 }}
           className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-6"
         >
-          <h3 className="text-lg font-barlow font-semibold mb-6">Generation Steps</h3>
+          <h3 className="text-lg font-semibold mb-6">Generation Steps</h3>
           <div className="space-y-4">
             {PROGRESS_STEPS.map((step, index) => {
               const isActive = jobStatus.current_step === step.step
@@ -528,7 +528,7 @@ export default function ProgressPage() {
                   </div>
                   <div className="flex-1">
                     <div className="flex items-center justify-between mb-1">
-                      <h4 className={`font-barlow font-semibold ${
+                      <h4 className={`font-semibold ${
                         isActive || isInProgress
                           ? 'text-blue-700 dark:text-blue-300'
                           : isCompleted
@@ -537,7 +537,7 @@ export default function ProgressPage() {
                       }`}>
                         {step.step}
                       </h4>
-                      <span className="text-xs text-slate-500 dark:text-slate-400 font-barlow">
+                      <span className="text-xs text-slate-500 dark:text-slate-400">
                         {Math.round(stepProgress)}%
                       </span>
                     </div>
@@ -549,7 +549,7 @@ export default function ProgressPage() {
                         />
                       </div>
                     )}
-                    <p className="text-sm text-slate-500 dark:text-slate-400 font-barlow">
+                    <p className="text-sm text-slate-500 dark:text-slate-400">
                       {isCompleted
                         ? 'Completed'
                         : (isActive || isInProgress)
@@ -572,7 +572,7 @@ export default function ProgressPage() {
           className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-6 mt-6"
         >
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-barlow font-semibold">Backend Logs</h3>
+            <h3 className="text-lg font-semibold">Backend Logs</h3>
             <div className="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
               <div className={`w-2 h-2 rounded-full ${
                 (jobStatus.status === 'processing' || jobStatus.status === 'pending') && autoRefresh
@@ -638,14 +638,14 @@ export default function ProgressPage() {
             <div className="flex items-center gap-4">
               <button
                 onClick={handleGoHome}
-                className="flex items-center gap-2 px-4 py-2 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors font-barlow"
+                className="flex items-center gap-2 px-4 py-2 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors"
               >
                 <Home className="w-4 h-4" />
                 Dashboard
               </button>
               <button
                 onClick={() => router.push('/projects')}
-                className="flex items-center gap-2 px-4 py-2 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors font-barlow"
+                className="flex items-center gap-2 px-4 py-2 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors"
               >
                 <Eye className="w-4 h-4" />
                 My Projects
@@ -656,7 +656,7 @@ export default function ProgressPage() {
               {jobStatus.status !== 'completed' && jobStatus.status !== 'failed' && (
                 <button
                   onClick={handleNewProject}
-                  className="flex items-center gap-2 px-4 py-2 text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-lg transition-colors font-barlow"
+                  className="flex items-center gap-2 px-4 py-2 text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-lg transition-colors"
                 >
                   <ArrowRight className="w-4 h-4" />
                   Start New Project
@@ -665,12 +665,12 @@ export default function ProgressPage() {
               
               {jobStatus.status === 'completed' && (
                 <div className="flex items-center gap-2">
-                  <span className="text-sm text-slate-500 dark:text-slate-400 font-barlow">
+                  <span className="text-sm text-slate-500 dark:text-slate-400">
                     Tutorial ready!
                   </span>
                   <button
                     onClick={handleViewProjects}
-                    className="flex items-center gap-2 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors font-barlow"
+                    className="flex items-center gap-2 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors"
                   >
                     <ArrowRight className="w-4 h-4" />
                     View & Manage
@@ -680,12 +680,12 @@ export default function ProgressPage() {
               
               {jobStatus.status === 'failed' && (
                 <div className="flex items-center gap-2">
-                  <span className="text-sm text-red-500 dark:text-red-400 font-barlow">
+                  <span className="text-sm text-red-500 dark:text-red-400">
                     Generation failed
                   </span>
                   <button
                     onClick={handleNewProject}
-                    className="flex items-center gap-2 px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg transition-colors font-barlow"
+                    className="flex items-center gap-2 px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg transition-colors"
                   >
                     <ArrowRight className="w-4 h-4" />
                     Try Again

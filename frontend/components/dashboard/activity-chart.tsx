@@ -47,8 +47,8 @@ export function ActivityChart() {
         className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-6"
       >
         <div className="mb-6">
-          <h2 className="text-xl font-barlow font-bold">Weekly Activity</h2>
-          <p className="text-sm text-slate-600 dark:text-slate-400 font-barlow">
+          <h2 className="text-xl font-bold">Weekly Activity</h2>
+          <p className="text-sm text-slate-600 dark:text-slate-400">
             Tutorial generation activity over the past week
           </p>
         </div>
@@ -76,12 +76,12 @@ export function ActivityChart() {
       className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-6"
     >
       <div className="mb-6">
-        <h2 className="text-xl font-barlow font-bold">Weekly Activity</h2>
-        <p className="text-sm text-slate-600 dark:text-slate-400 font-barlow">
+        <h2 className="text-xl font-bold">Weekly Activity</h2>
+        <p className="text-sm text-slate-600 dark:text-slate-400">
           Tutorial generation activity over the past week
         </p>
         {totalCompleted + totalFailed + totalProcessing > 0 && (
-          <p className="text-xs text-slate-500 dark:text-slate-400 font-barlow mt-1">
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
             {totalCompleted + totalFailed + totalProcessing} total projects this week
           </p>
         )}
@@ -92,11 +92,11 @@ export function ActivityChart() {
           <CartesianGrid strokeDasharray="3 3" className="stroke-slate-200 dark:stroke-slate-800" />
           <XAxis 
             dataKey="name" 
-            className="font-barlow"
+            className=""
             tick={{ fill: 'currentColor', fontSize: 12 }}
           />
           <YAxis 
-            className="font-barlow"
+            className=""
             tick={{ fill: 'currentColor', fontSize: 12 }}
           />
           <Tooltip 
@@ -116,15 +116,15 @@ export function ActivityChart() {
       <div className="flex items-center justify-center gap-6 mt-4">
         <div className="flex items-center gap-2">
           <div className="w-3 h-3 bg-blue-500 rounded-sm"></div>
-          <span className="text-sm font-barlow text-slate-600 dark:text-slate-400">Completed</span>
+          <span className="text-sm text-slate-600 dark:text-slate-400">Completed</span>
         </div>
         <div className="flex items-center gap-2">
           <div className="w-3 h-3 bg-yellow-500 rounded-sm"></div>
-          <span className="text-sm font-barlow text-slate-600 dark:text-slate-400">Processing</span>
+          <span className="text-sm text-slate-600 dark:text-slate-400">Processing</span>
         </div>
         <div className="flex items-center gap-2">
           <div className="w-3 h-3 bg-red-500 rounded-sm"></div>
-          <span className="text-sm font-barlow text-slate-600 dark:text-slate-400">Failed</span>
+          <span className="text-sm text-slate-600 dark:text-slate-400">Failed</span>
         </div>
       </div>
     </motion.div>

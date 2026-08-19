@@ -91,7 +91,7 @@ export default function ProjectDetailPage() {
       <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-slate-950 dark:to-blue-950 flex items-center justify-center">
         <div className="text-center">
           <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-slate-600 dark:text-slate-400 font-barlow">Loading project...</p>
+          <p className="text-slate-600 dark:text-slate-400">Loading project...</p>
         </div>
       </div>
     )
@@ -102,10 +102,10 @@ export default function ProjectDetailPage() {
       <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-slate-950 dark:to-blue-950 flex items-center justify-center">
         <div className="text-center">
           <XCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
-          <p className="text-slate-600 dark:text-slate-400 font-barlow mb-4">Project not found</p>
+          <p className="text-slate-600 dark:text-slate-400 mb-4">Project not found</p>
           <button
             onClick={() => router.push('/projects')}
-            className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-barlow transition-colors"
+            className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors"
           >
             Back to Projects
           </button>
@@ -147,7 +147,7 @@ export default function ProjectDetailPage() {
         <div className="mb-8">
           <button
             onClick={() => router.push('/projects')}
-            className="flex items-center gap-2 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 mb-4 font-barlow"
+            className="flex items-center gap-2 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 mb-4"
           >
             <ArrowLeft className="w-4 h-4" />
             Back to Projects
@@ -168,12 +168,12 @@ export default function ProjectDetailPage() {
                   )}
                 </div>
                 <div>
-                  <h1 className="text-3xl font-barlow font-bold tracking-tight">{project.name}</h1>
-                  <p className="text-slate-600 dark:text-slate-400 font-barlow">{project.source}</p>
+                  <h1 className="text-3xl font-bold tracking-tight">{project.name}</h1>
+                  <p className="text-slate-600 dark:text-slate-400">{project.source}</p>
                 </div>
               </div>
               
-              <div className="flex items-center gap-4 text-sm text-slate-500 dark:text-slate-400 font-barlow">
+              <div className="flex items-center gap-4 text-sm text-slate-500 dark:text-slate-400">
                 <div className="flex items-center gap-1">
                   <Calendar className="w-4 h-4" />
                   Created {formatDate(project.created_at)}
@@ -200,21 +200,21 @@ export default function ProjectDetailPage() {
                 <div className="flex items-center gap-1">
                   <button
                     onClick={() => handleDownload('markdown')}
-                    className="px-3 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg text-sm font-barlow transition-colors flex items-center gap-1"
+                    className="px-3 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg text-sm transition-colors flex items-center gap-1"
                   >
                     <Download className="w-4 h-4" />
                     MD
                   </button>
                   <button
                     onClick={() => handleDownload('html')}
-                    className="px-3 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg text-sm font-barlow transition-colors flex items-center gap-1"
+                    className="px-3 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg text-sm transition-colors flex items-center gap-1"
                   >
                     <Download className="w-4 h-4" />
                     HTML
                   </button>
                   <button
                     onClick={() => handleDownload('pdf')}
-                    className="px-3 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg text-sm font-barlow transition-colors flex items-center gap-1"
+                    className="px-3 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg text-sm transition-colors flex items-center gap-1"
                   >
                     <Download className="w-4 h-4" />
                     PDF
@@ -225,7 +225,7 @@ export default function ProjectDetailPage() {
               <button
                 onClick={() => deleteProjectMutation.mutate()}
                 disabled={deleteProjectMutation.isPending}
-                className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg font-barlow font-semibold transition-colors disabled:opacity-50 text-sm"
+                className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg font-semibold transition-colors disabled:opacity-50 text-sm"
               >
                 {deleteProjectMutation.isPending ? 'Deleting...' : 'Delete'}
               </button>
@@ -239,19 +239,19 @@ export default function ProjectDetailPage() {
             <div className="flex items-center gap-3">
               {getStatusIcon()}
               <div>
-                <h2 className={`text-lg font-barlow font-semibold ${getStatusColor()}`}>
+                <h2 className={`text-lg font-semibold ${getStatusColor()}`}>
                   {project.status.charAt(0).toUpperCase() + project.status.slice(1)}
                 </h2>
                 {project.current_step && (
-                  <p className="text-sm text-slate-600 dark:text-slate-400 font-barlow">
+                  <p className="text-sm text-slate-600 dark:text-slate-400">
                     {project.current_step}
                   </p>
                 )}
               </div>
             </div>
             <div className="text-right">
-              <div className="text-2xl font-barlow font-bold">{Math.min(project.progress || 0, 100)}%</div>
-              <div className="text-sm text-slate-500 dark:text-slate-400 font-barlow">Progress</div>
+              <div className="text-2xl font-bold">{Math.min(project.progress || 0, 100)}%</div>
+              <div className="text-sm text-slate-500 dark:text-slate-400">Progress</div>
             </div>
           </div>
 
@@ -271,7 +271,7 @@ export default function ProjectDetailPage() {
 
           {project.error && (
             <div className="mt-4 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
-              <p className="text-sm text-red-700 dark:text-red-300 font-barlow">{project.error}</p>
+              <p className="text-sm text-red-700 dark:text-red-300">{project.error}</p>
             </div>
           )}
         </div>
@@ -281,20 +281,20 @@ export default function ProjectDetailPage() {
           <Tabs.List className="flex bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-1 mb-6">
             <Tabs.Trigger
               value="overview"
-              className="flex-1 px-4 py-2 rounded-md font-barlow font-semibold transition-all data-[state=active]:bg-slate-100 data-[state=active]:dark:bg-slate-800"
+              className="flex-1 px-4 py-2 rounded-md font-semibold transition-all data-[state=active]:bg-slate-100 data-[state=active]:dark:bg-slate-800"
             >
               Overview
             </Tabs.Trigger>
             <Tabs.Trigger
               value="config"
-              className="flex-1 px-4 py-2 rounded-md font-barlow font-semibold transition-all data-[state=active]:bg-slate-100 data-[state=active]:dark:bg-slate-800"
+              className="flex-1 px-4 py-2 rounded-md font-semibold transition-all data-[state=active]:bg-slate-100 data-[state=active]:dark:bg-slate-800"
             >
               Configuration
             </Tabs.Trigger>
             {project.status === 'completed' && (
               <Tabs.Trigger
                 value="results"
-                className="flex-1 px-4 py-2 rounded-md font-barlow font-semibold transition-all data-[state=active]:bg-slate-100 data-[state=active]:dark:bg-slate-800"
+                className="flex-1 px-4 py-2 rounded-md font-semibold transition-all data-[state=active]:bg-slate-100 data-[state=active]:dark:bg-slate-800"
               >
                 Results
               </Tabs.Trigger>
@@ -310,23 +310,23 @@ export default function ProjectDetailPage() {
                 className="space-y-6"
               >
                 <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-6">
-                  <h3 className="text-xl font-barlow font-semibold mb-4">Project Information</h3>
+                  <h3 className="text-xl font-semibold mb-4">Project Information</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <label className="text-sm font-barlow font-semibold text-slate-500 dark:text-slate-400">Name</label>
-                      <p className="font-barlow">{project.name}</p>
+                      <label className="text-sm font-semibold text-slate-500 dark:text-slate-400">Name</label>
+                      <p className="">{project.name}</p>
                     </div>
                     <div>
-                      <label className="text-sm font-barlow font-semibold text-slate-500 dark:text-slate-400">Type</label>
-                      <p className="font-barlow capitalize">{project.type}</p>
+                      <label className="text-sm font-semibold text-slate-500 dark:text-slate-400">Type</label>
+                      <p className="capitalize">{project.type}</p>
                     </div>
                     <div>
-                      <label className="text-sm font-barlow font-semibold text-slate-500 dark:text-slate-400">Source</label>
-                      <p className="font-barlow break-all">{project.source}</p>
+                      <label className="text-sm font-semibold text-slate-500 dark:text-slate-400">Source</label>
+                      <p className="break-all">{project.source}</p>
                     </div>
                     <div>
-                      <label className="text-sm font-barlow font-semibold text-slate-500 dark:text-slate-400">Status</label>
-                      <p className={`font-barlow capitalize ${getStatusColor()}`}>{project.status}</p>
+                      <label className="text-sm font-semibold text-slate-500 dark:text-slate-400">Status</label>
+                      <p className={`capitalize ${getStatusColor()}`}>{project.status}</p>
                     </div>
                   </div>
                 </div>
@@ -340,39 +340,39 @@ export default function ProjectDetailPage() {
                 exit={{ opacity: 0, y: -20 }}
                 className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-6"
               >
-                <h3 className="text-xl font-barlow font-semibold mb-4 flex items-center gap-2">
+                <h3 className="text-xl font-semibold mb-4 flex items-center gap-2">
                   <Settings className="w-5 h-5" />
                   Project Configuration
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <label className="text-sm font-barlow font-semibold text-slate-500 dark:text-slate-400">Language</label>
-                    <p className="font-barlow">{project.config.language || 'English'}</p>
+                    <label className="text-sm font-semibold text-slate-500 dark:text-slate-400">Language</label>
+                    <p className="">{project.config.language || 'English'}</p>
                   </div>
                   <div>
-                    <label className="text-sm font-barlow font-semibold text-slate-500 dark:text-slate-400">Max File Size</label>
-                    <p className="font-barlow">{project.config.max_file_size?.toLocaleString()} bytes</p>
+                    <label className="text-sm font-semibold text-slate-500 dark:text-slate-400">Max File Size</label>
+                    <p className="">{project.config.max_file_size?.toLocaleString()} bytes</p>
                   </div>
                   <div>
-                    <label className="text-sm font-barlow font-semibold text-slate-500 dark:text-slate-400">Max Abstractions</label>
-                    <p className="font-barlow">{project.config.max_abstractions}</p>
+                    <label className="text-sm font-semibold text-slate-500 dark:text-slate-400">Max Abstractions</label>
+                    <p className="">{project.config.max_abstractions}</p>
                   </div>
                   <div>
-                    <label className="text-sm font-barlow font-semibold text-slate-500 dark:text-slate-400">Cache Enabled</label>
-                    <p className="font-barlow">{project.config.use_cache ? 'Yes' : 'No'}</p>
+                    <label className="text-sm font-semibold text-slate-500 dark:text-slate-400">Cache Enabled</label>
+                    <p className="">{project.config.use_cache ? 'Yes' : 'No'}</p>
                   </div>
                 </div>
 
                 {project.config.include_patterns && (
                   <div className="mt-6">
-                    <label className="text-sm font-barlow font-semibold text-slate-500 dark:text-slate-400 mb-2 block">
+                    <label className="text-sm font-semibold text-slate-500 dark:text-slate-400 mb-2 block">
                       Include Patterns
                     </label>
                     <div className="flex flex-wrap gap-2">
                       {project.config.include_patterns.map((pattern, index) => (
                         <span
                           key={index}
-                          className="px-3 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 rounded-full text-sm font-barlow"
+                          className="px-3 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 rounded-full text-sm"
                         >
                           {pattern}
                         </span>
@@ -383,14 +383,14 @@ export default function ProjectDetailPage() {
 
                 {project.config.exclude_patterns && (
                   <div className="mt-6">
-                    <label className="text-sm font-barlow font-semibold text-slate-500 dark:text-slate-400 mb-2 block">
+                    <label className="text-sm font-semibold text-slate-500 dark:text-slate-400 mb-2 block">
                       Exclude Patterns
                     </label>
                     <div className="flex flex-wrap gap-2">
                       {project.config.exclude_patterns.map((pattern, index) => (
                         <span
                           key={index}
-                          className="px-3 py-1 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 rounded-full text-sm font-barlow"
+                          className="px-3 py-1 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 rounded-full text-sm"
                         >
                           {pattern}
                         </span>
@@ -409,15 +409,15 @@ export default function ProjectDetailPage() {
                   exit={{ opacity: 0, y: -20 }}
                   className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-6"
                 >
-                  <h3 className="text-xl font-barlow font-semibold mb-4 flex items-center gap-2">
+                  <h3 className="text-xl font-semibold mb-4 flex items-center gap-2">
                     <FileText className="w-5 h-5" />
                     Tutorial Results
                   </h3>
                   <div className="space-y-4">
                     <div className="text-center py-8 text-slate-500 dark:text-slate-400">
                       <FileText className="w-12 h-12 mx-auto mb-4" />
-                      <p className="font-barlow">Tutorial content will be displayed here</p>
-                      <p className="text-sm font-barlow">Use the download buttons above to export the tutorial</p>
+                      <p className="">Tutorial content will be displayed here</p>
+                      <p className="text-sm">Use the download buttons above to export the tutorial</p>
                     </div>
                   </div>
                 </motion.div>

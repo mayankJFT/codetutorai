@@ -118,14 +118,14 @@ export function ProjectForm() {
         <Tabs.List className="grid grid-cols-2 gap-4 p-1 bg-slate-100 dark:bg-slate-800 rounded-lg">
           <Tabs.Trigger
             value="github"
-            className="flex items-center justify-center gap-2 px-4 py-3 rounded-md font-barlow font-semibold transition-all data-[state=active]:bg-white dark:data-[state=active]:bg-slate-900 data-[state=active]:shadow-sm"
+            className="flex items-center justify-center gap-2 px-4 py-3 rounded-md font-semibold transition-all data-[state=active]:bg-white dark:data-[state=active]:bg-slate-900 data-[state=active]:shadow-sm"
           >
             <Github className="w-5 h-5" />
             GitHub Repository
           </Tabs.Trigger>
           <Tabs.Trigger
             value="local"
-            className="flex items-center justify-center gap-2 px-4 py-3 rounded-md font-barlow font-semibold transition-all data-[state=active]:bg-white dark:data-[state=active]:bg-slate-900 data-[state=active]:shadow-sm"
+            className="flex items-center justify-center gap-2 px-4 py-3 rounded-md font-semibold transition-all data-[state=active]:bg-white dark:data-[state=active]:bg-slate-900 data-[state=active]:shadow-sm"
           >
             <HardDrive className="w-5 h-5" />
             Local Directory
@@ -136,7 +136,7 @@ export function ProjectForm() {
           <Tabs.Content value="github" className="space-y-4">
             <div>
               <div className="flex items-center justify-between mb-2">
-                <label className="block text-sm font-barlow font-semibold">
+                <label className="block text-sm font-semibold">
                   Repository URL <span className="text-red-500">*</span>
                 </label>
                 <RepositorySearch onSelect={handleGitHubRepoSelect} />
@@ -146,16 +146,16 @@ export function ProjectForm() {
                 value={config.repo_url}
                 onChange={(e) => setConfig(prev => ({ ...prev, repo_url: e.target.value }))}
                 placeholder="https://github.com/owner/repository"
-                className="w-full px-4 py-2 border border-slate-200 dark:border-slate-700 rounded-lg font-barlow focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-slate-800"
+                className="w-full px-4 py-2 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-slate-800"
                 required={sourceType === 'github'}
               />
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 font-barlow">
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
                 Enter repository URL manually or use the search button to find public repositories
               </p>
             </div>
 
             <div>
-              <label className="block text-sm font-barlow font-semibold mb-2">
+              <label className="block text-sm font-semibold mb-2">
                 GitHub Token (Optional)
               </label>
               <input
@@ -163,9 +163,9 @@ export function ProjectForm() {
                 value={config.github_token}
                 onChange={(e) => setConfig(prev => ({ ...prev, github_token: e.target.value }))}
                 placeholder="ghp_xxxxxxxxxxxx"
-                className="w-full px-4 py-2 border border-slate-200 dark:border-slate-700 rounded-lg font-barlow focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-slate-800"
+                className="w-full px-4 py-2 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-slate-800"
               />
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 font-barlow">
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
                 Required for private repositories and to avoid rate limits
               </p>
             </div>
@@ -173,7 +173,7 @@ export function ProjectForm() {
 
           <Tabs.Content value="local" className="space-y-4">
             <div>
-              <label className="block text-sm font-barlow font-semibold mb-2">
+              <label className="block text-sm font-semibold mb-2">
                 Directory Path <span className="text-red-500">*</span>
               </label>
               <input
@@ -181,7 +181,7 @@ export function ProjectForm() {
                 value={config.local_dir}
                 onChange={(e) => setConfig(prev => ({ ...prev, local_dir: e.target.value }))}
                 placeholder="/path/to/your/codebase"
-                className="w-full px-4 py-2 border border-slate-200 dark:border-slate-700 rounded-lg font-barlow focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-slate-800"
+                className="w-full px-4 py-2 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-slate-800"
                 required={sourceType === 'local'}
               />
             </div>
@@ -191,10 +191,10 @@ export function ProjectForm() {
 
       {/* Project Configuration */}
       <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-6 space-y-4">
-        <h3 className="text-lg font-barlow font-bold mb-4">Project Configuration</h3>
+        <h3 className="text-lg font-bold mb-4">Project Configuration</h3>
 
         <div>
-          <label className="block text-sm font-barlow font-semibold mb-2">
+          <label className="block text-sm font-semibold mb-2">
             Project Name (Optional)
           </label>
           <input
@@ -202,19 +202,19 @@ export function ProjectForm() {
             value={config.project_name}
             onChange={(e) => setConfig(prev => ({ ...prev, project_name: e.target.value }))}
             placeholder="My Awesome Project"
-            className="w-full px-4 py-2 border border-slate-200 dark:border-slate-700 rounded-lg font-barlow focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-slate-800"
+            className="w-full px-4 py-2 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-slate-800"
           />
         </div>
 
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-barlow font-semibold mb-2">
+            <label className="block text-sm font-semibold mb-2">
               Language
             </label>
             <select
               value={config.language}
               onChange={(e) => setConfig(prev => ({ ...prev, language: e.target.value }))}
-              className="w-full px-4 py-2 border border-slate-200 dark:border-slate-700 rounded-lg font-barlow focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-slate-800"
+              className="w-full px-4 py-2 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-slate-800"
             >
               {LANGUAGES.map(lang => (
                 <option key={lang} value={lang}>{lang}</option>
@@ -223,7 +223,7 @@ export function ProjectForm() {
           </div>
 
           <div>
-            <label className="block text-sm font-barlow font-semibold mb-2">
+            <label className="block text-sm font-semibold mb-2">
               Max Abstractions
             </label>
             <input
@@ -232,29 +232,29 @@ export function ProjectForm() {
               max="20"
               value={config.max_abstractions}
               onChange={(e) => setConfig(prev => ({ ...prev, max_abstractions: parseInt(e.target.value) }))}
-              className="w-full px-4 py-2 border border-slate-200 dark:border-slate-700 rounded-lg font-barlow focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-slate-800"
+              className="w-full px-4 py-2 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-slate-800"
             />
           </div>
         </div>
 
         <div>
-          <label className="block text-sm font-barlow font-semibold mb-2">
+          <label className="block text-sm font-semibold mb-2">
             Max File Size (bytes)
           </label>
           <input
             type="number"
             value={config.max_file_size}
             onChange={(e) => setConfig(prev => ({ ...prev, max_file_size: parseInt(e.target.value) }))}
-            className="w-full px-4 py-2 border border-slate-200 dark:border-slate-700 rounded-lg font-barlow focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-slate-800"
+            className="w-full px-4 py-2 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-slate-800"
           />
         </div>
 
         <div className="flex items-center justify-between">
           <div>
-            <label className="text-sm font-barlow font-semibold">
+            <label className="text-sm font-semibold">
               Enable LLM Caching
             </label>
-            <p className="text-xs text-slate-500 dark:text-slate-400 font-barlow">
+            <p className="text-xs text-slate-500 dark:text-slate-400">
               Cache responses to speed up regeneration
             </p>
           </div>
@@ -270,11 +270,11 @@ export function ProjectForm() {
 
       {/* File Patterns */}
       <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-6 space-y-4">
-        <h3 className="text-lg font-barlow font-bold mb-4">File Patterns</h3>
+        <h3 className="text-lg font-bold mb-4">File Patterns</h3>
 
         {/* Include Patterns */}
         <div>
-          <label className="block text-sm font-barlow font-semibold mb-2">
+          <label className="block text-sm font-semibold mb-2">
             Include Patterns
           </label>
           <div className="flex gap-2 mb-2">
@@ -283,7 +283,7 @@ export function ProjectForm() {
               value={newIncludePattern}
               onChange={(e) => setNewIncludePattern(e.target.value)}
               placeholder="*.py"
-              className="flex-1 px-4 py-2 border border-slate-200 dark:border-slate-700 rounded-lg font-barlow focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-slate-800"
+              className="flex-1 px-4 py-2 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-slate-800"
               onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addPattern('include'))}
             />
             <button
@@ -298,7 +298,7 @@ export function ProjectForm() {
             {config.include_patterns?.map((pattern, i) => (
               <span
                 key={i}
-                className="inline-flex items-center gap-1 px-3 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-full text-sm font-barlow"
+                className="inline-flex items-center gap-1 px-3 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-full text-sm"
               >
                 {pattern}
                 <button
@@ -315,7 +315,7 @@ export function ProjectForm() {
 
         {/* Exclude Patterns */}
         <div>
-          <label className="block text-sm font-barlow font-semibold mb-2">
+          <label className="block text-sm font-semibold mb-2">
             Exclude Patterns
           </label>
           <div className="flex gap-2 mb-2">
@@ -324,7 +324,7 @@ export function ProjectForm() {
               value={newExcludePattern}
               onChange={(e) => setNewExcludePattern(e.target.value)}
               placeholder="test/*"
-              className="flex-1 px-4 py-2 border border-slate-200 dark:border-slate-700 rounded-lg font-barlow focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-slate-800"
+              className="flex-1 px-4 py-2 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-slate-800"
               onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addPattern('exclude'))}
             />
             <button
@@ -339,7 +339,7 @@ export function ProjectForm() {
             {config.exclude_patterns?.map((pattern, i) => (
               <span
                 key={i}
-                className="inline-flex items-center gap-1 px-3 py-1 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 rounded-full text-sm font-barlow"
+                className="inline-flex items-center gap-1 px-3 py-1 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 rounded-full text-sm"
               >
                 {pattern}
                 <button
@@ -360,14 +360,14 @@ export function ProjectForm() {
         <button
           type="button"
           onClick={() => router.back()}
-          className="flex-1 px-6 py-3 border border-slate-200 dark:border-slate-700 rounded-lg font-barlow font-semibold hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
+          className="flex-1 px-6 py-3 border border-slate-200 dark:border-slate-700 rounded-lg font-semibold hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
         >
           Cancel
         </button>
         <button
           type="submit"
           disabled={createProjectMutation.isPending}
-          className="flex-1 px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-lg font-barlow font-semibold hover:from-blue-600 hover:to-purple-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+          className="flex-1 px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-lg font-semibold hover:from-blue-600 hover:to-purple-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {createProjectMutation.isPending ? 'Creating...' : 'Generate Tutorial'}
         </button>

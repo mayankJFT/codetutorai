@@ -86,7 +86,7 @@ export function StatsCards() {
               <div className={`w-12 h-12 bg-gradient-to-br ${stat.color} rounded-lg flex items-center justify-center`}>
                 <Icon className="w-6 h-6 text-white" />
               </div>
-              <span className={`text-sm font-barlow font-semibold ${
+              <span className={`text-sm font-semibold ${
                 stat.trend === 'up' ? 'text-green-600 dark:text-green-400' : 
                 stat.trend === 'down' ? 'text-red-600 dark:text-red-400' : 
                 'text-slate-600 dark:text-slate-400'
@@ -95,8 +95,8 @@ export function StatsCards() {
               </span>
             </div>
             <div>
-              <p className="text-3xl font-barlow font-bold">{stat.value}</p>
-              <p className="text-sm text-slate-600 dark:text-slate-400 font-barlow">{stat.label}</p>
+              <p className="text-3xl font-bold">{stat.value}</p>
+              <p className="text-sm text-slate-600 dark:text-slate-400">{stat.label}</p>
             </div>
           </motion.div>
         )

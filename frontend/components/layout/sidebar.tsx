@@ -60,7 +60,7 @@ export function Sidebar({ open, onToggle }: SidebarProps) {
                   exit={{ opacity: 0, x: -20 }}
                   transition={{ duration: 0.2 }}
                 >
-                  <h1 className="font-barlow font-bold text-xl tracking-tight">CODETUTOR AI</h1>
+                  <h1 className="font-bold text-xl tracking-tight">CODETUTOR AI</h1>
                   <p className="text-xs text-slate-500 dark:text-slate-400">Advanced Code Learning</p>
                 </motion.div>
               )}
@@ -83,24 +83,24 @@ export function Sidebar({ open, onToggle }: SidebarProps) {
             )}
           >
             <Plus className="w-5 h-5" />
-            {open && <span className="font-barlow font-semibold">New Project</span>}
+            {open && <span className="font-semibold">New Project</span>}
           </motion.button>
         </div>
 
         {/* Quick Actions */}
         {open && (
           <div className="px-4 mb-4">
-            <p className="text-xs font-barlow font-semibold text-slate-500 dark:text-slate-400 mb-2 uppercase tracking-wider">
+            <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-2 uppercase tracking-wider">
               Quick Start
             </p>
             <div className="space-y-2">
               <button className="w-full flex items-center gap-2 px-3 py-2 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">
                 <Github className="w-4 h-4" />
-                <span className="text-sm font-barlow">From GitHub</span>
+                <span className="text-sm">From GitHub</span>
               </button>
               <button className="w-full flex items-center gap-2 px-3 py-2 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">
                 <HardDrive className="w-4 h-4" />
-                <span className="text-sm font-barlow">Local Directory</span>
+                <span className="text-sm">Local Directory</span>
               </button>
             </div>
           </div>
@@ -109,7 +109,7 @@ export function Sidebar({ open, onToggle }: SidebarProps) {
         {/* Navigation Menu */}
         <nav className="flex-1 px-4">
           {open && (
-            <p className="text-xs font-barlow font-semibold text-slate-500 dark:text-slate-400 mb-2 uppercase tracking-wider">
+            <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-2 uppercase tracking-wider">
               Navigation
             </p>
           )}
@@ -132,7 +132,7 @@ export function Sidebar({ open, onToggle }: SidebarProps) {
                     <Icon className={cn("w-5 h-5", isActive && "text-blue-600 dark:text-blue-400")} />
                     {open && (
                       <span className={cn(
-                        "font-barlow font-medium",
+                        "font-medium",
                         isActive && "text-blue-600 dark:text-blue-400"
                       )}>
                         {item.label}

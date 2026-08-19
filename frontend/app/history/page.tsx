@@ -94,7 +94,7 @@ export default function HistoryPage() {
       <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-slate-950 dark:to-blue-950 flex items-center justify-center">
         <div className="text-center">
           <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-slate-600 dark:text-slate-400 font-barlow">Loading project history...</p>
+          <p className="text-slate-600 dark:text-slate-400">Loading project history...</p>
         </div>
       </div>
     )
@@ -110,8 +110,8 @@ export default function HistoryPage() {
               <History className="w-5 h-5 text-white" />
             </div>
             <div>
-              <h1 className="text-3xl font-barlow font-bold tracking-tight">Project History</h1>
-              <p className="text-slate-600 dark:text-slate-400 font-barlow">
+              <h1 className="text-3xl font-bold tracking-tight">Project History</h1>
+              <p className="text-slate-600 dark:text-slate-400">
                 View and manage your previous tutorial generation projects
               </p>
             </div>
@@ -120,28 +120,28 @@ export default function HistoryPage() {
           {/* Statistics */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
             <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-4">
-              <div className="text-2xl font-barlow font-bold text-blue-600 dark:text-blue-400">
+              <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
                 {totalProjects}
               </div>
-              <div className="text-sm text-slate-600 dark:text-slate-400 font-barlow">Total Projects</div>
+              <div className="text-sm text-slate-600 dark:text-slate-400">Total Projects</div>
             </div>
             <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-4">
-              <div className="text-2xl font-barlow font-bold text-green-600 dark:text-green-400">
+              <div className="text-2xl font-bold text-green-600 dark:text-green-400">
                 {completedProjects}
               </div>
-              <div className="text-sm text-slate-600 dark:text-slate-400 font-barlow">Completed</div>
+              <div className="text-sm text-slate-600 dark:text-slate-400">Completed</div>
             </div>
             <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-4">
-              <div className="text-2xl font-barlow font-bold text-red-600 dark:text-red-400">
+              <div className="text-2xl font-bold text-red-600 dark:text-red-400">
                 {failedProjects}
               </div>
-              <div className="text-sm text-slate-600 dark:text-slate-400 font-barlow">Failed</div>
+              <div className="text-sm text-slate-600 dark:text-slate-400">Failed</div>
             </div>
             <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-4">
-              <div className="text-2xl font-barlow font-bold text-slate-600 dark:text-slate-400">
+              <div className="text-2xl font-bold text-slate-600 dark:text-slate-400">
                 {githubProjects}
               </div>
-              <div className="text-sm text-slate-600 dark:text-slate-400 font-barlow">GitHub Repos</div>
+              <div className="text-sm text-slate-600 dark:text-slate-400">GitHub Repos</div>
             </div>
           </div>
         </div>
@@ -157,7 +157,7 @@ export default function HistoryPage() {
                 placeholder="Search projects..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg font-barlow placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
 
@@ -165,7 +165,7 @@ export default function HistoryPage() {
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value as SortOption)}
-              className="px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg font-barlow focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
               <option value="newest">Newest First</option>
               <option value="oldest">Oldest First</option>
@@ -177,7 +177,7 @@ export default function HistoryPage() {
             <select
               value={filterBy}
               onChange={(e) => setFilterBy(e.target.value as FilterOption)}
-              className="px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg font-barlow focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
               <option value="all">All Projects</option>
               <option value="completed">Completed</option>
@@ -194,8 +194,8 @@ export default function HistoryPage() {
             <div className="w-24 h-24 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-4">
               <History className="w-12 h-12 text-slate-400" />
             </div>
-            <h3 className="text-xl font-barlow font-semibold mb-2">No projects found</h3>
-            <p className="text-slate-600 dark:text-slate-400 font-barlow mb-6">
+            <h3 className="text-xl font-semibold mb-2">No projects found</h3>
+            <p className="text-slate-600 dark:text-slate-400 mb-6">
               {searchQuery || filterBy !== 'all' 
                 ? 'No projects match your search criteria'
                 : 'You haven\'t created any projects yet'
@@ -203,7 +203,7 @@ export default function HistoryPage() {
             </p>
             <button
               onClick={() => router.push('/new-project')}
-              className="px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-lg font-barlow font-semibold hover:from-blue-600 hover:to-purple-700 transition-all"
+              className="px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-lg font-semibold hover:from-blue-600 hover:to-purple-700 transition-all"
             >
               Create Your First Project
             </button>
@@ -237,7 +237,7 @@ export default function HistoryPage() {
                       {/* Project Info */}
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-1">
-                          <h3 className="text-lg font-barlow font-semibold truncate">
+                          <h3 className="text-lg font-semibold truncate">
                             {project.name}
                           </h3>
                           <div className="flex items-center gap-1">
@@ -253,11 +253,11 @@ export default function HistoryPage() {
                           </div>
                         </div>
                         
-                        <p className="text-sm text-slate-600 dark:text-slate-400 font-barlow truncate mb-2">
+                        <p className="text-sm text-slate-600 dark:text-slate-400 truncate mb-2">
                           {project.source}
                         </p>
                         
-                        <div className="flex items-center gap-4 text-sm text-slate-500 dark:text-slate-400 font-barlow">
+                        <div className="flex items-center gap-4 text-sm text-slate-500 dark:text-slate-400">
                           <div className="flex items-center gap-1">
                             <Calendar className="w-4 h-4" />
                             {formatDate(project.created_at)}
@@ -290,7 +290,7 @@ export default function HistoryPage() {
                       <DropdownMenu.Portal>
                         <DropdownMenu.Content className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg shadow-lg p-2 min-w-[150px] z-50">
                           <DropdownMenu.Item 
-                            className="flex items-center gap-2 px-3 py-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-md cursor-pointer font-barlow"
+                            className="flex items-center gap-2 px-3 py-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-md cursor-pointer"
                             onClick={() => router.push(`/projects/${project.id}`)}
                           >
                             <Eye className="w-4 h-4" />
@@ -298,7 +298,7 @@ export default function HistoryPage() {
                           </DropdownMenu.Item>
                           <DropdownMenu.Separator className="my-1 h-px bg-slate-200 dark:bg-slate-800" />
                           <DropdownMenu.Item 
-                            className="flex items-center gap-2 px-3 py-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-md cursor-pointer font-barlow text-red-600 dark:text-red-400"
+                            className="flex items-center gap-2 px-3 py-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-md cursor-pointer text-red-600 dark:text-red-400"
                             onClick={() => handleDeleteProject(project)}
                           >
                             <Trash2 className="w-4 h-4" />
@@ -320,23 +320,23 @@ export default function HistoryPage() {
         <Dialog.Portal>
           <Dialog.Overlay className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40" />
           <Dialog.Content className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-md bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 z-50 p-6">
-            <Dialog.Title className="text-xl font-barlow font-bold mb-4">
+            <Dialog.Title className="text-xl font-bold mb-4">
               Delete Project
             </Dialog.Title>
-            <Dialog.Description className="text-slate-600 dark:text-slate-400 font-barlow mb-6">
+            <Dialog.Description className="text-slate-600 dark:text-slate-400 mb-6">
               Are you sure you want to delete "{projectToDelete?.name}"? This action cannot be undone and will permanently remove all generated content.
             </Dialog.Description>
             <div className="flex gap-4">
               <button
                 onClick={() => setDeleteDialogOpen(false)}
-                className="flex-1 px-4 py-2 border border-slate-200 dark:border-slate-700 rounded-lg font-barlow font-semibold hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
+                className="flex-1 px-4 py-2 border border-slate-200 dark:border-slate-700 rounded-lg font-semibold hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
               >
                 Cancel
               </button>
               <button
                 onClick={confirmDelete}
                 disabled={deleteProjectMutation.isPending}
-                className="flex-1 px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg font-barlow font-semibold transition-colors disabled:opacity-50"
+                className="flex-1 px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg font-semibold transition-colors disabled:opacity-50"
               >
                 {deleteProjectMutation.isPending ? 'Deleting...' : 'Delete'}
               </button>

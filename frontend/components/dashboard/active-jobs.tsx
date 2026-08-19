@@ -92,7 +92,7 @@ export function ActiveJobs() {
   if (isLoading) {
     return (
       <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-6">
-        <h3 className="text-lg font-barlow font-semibold mb-4">Active Jobs</h3>
+        <h3 className="text-lg font-semibold mb-4">Active Jobs</h3>
         <div className="flex items-center justify-center py-8">
           <Loader2 className="w-6 h-6 animate-spin text-slate-400" />
         </div>
@@ -103,11 +103,11 @@ export function ActiveJobs() {
   if (activeJobs.length === 0) {
     return (
       <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-6">
-        <h3 className="text-lg font-barlow font-semibold mb-4">Active Jobs</h3>
+        <h3 className="text-lg font-semibold mb-4">Active Jobs</h3>
         <div className="text-center py-8">
           <Clock className="w-12 h-12 text-slate-300 dark:text-slate-600 mx-auto mb-3" />
-          <p className="text-slate-500 dark:text-slate-400 font-barlow">No active jobs</p>
-          <p className="text-sm text-slate-400 dark:text-slate-500 font-barlow mt-1">
+          <p className="text-slate-500 dark:text-slate-400">No active jobs</p>
+          <p className="text-sm text-slate-400 dark:text-slate-500 mt-1">
             Create a new project to get started
           </p>
         </div>
@@ -118,8 +118,8 @@ export function ActiveJobs() {
   return (
     <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-6">
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-lg font-barlow font-semibold">Active Jobs</h3>
-        <span className="text-sm text-slate-500 dark:text-slate-400 font-barlow">
+        <h3 className="text-lg font-semibold">Active Jobs</h3>
+        <span className="text-sm text-slate-500 dark:text-slate-400">
           {activeJobs.length} active
         </span>
       </div>
@@ -136,10 +136,10 @@ export function ActiveJobs() {
           >
             <div className="flex items-start justify-between mb-3">
               <div className="flex-1">
-                <h4 className="font-barlow font-semibold text-sm mb-1 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                <h4 className="font-semibold text-sm mb-1 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
                   {job.name || 'Job ' + job.id}
                 </h4>
-                <p className="text-xs text-slate-500 dark:text-slate-400 font-barlow truncate">
+                <p className="text-xs text-slate-500 dark:text-slate-400 truncate">
                   {job.source || (job.current_step && `Current: ${job.current_step}`) || 'Processing...'}
                 </p>
               </div>
@@ -149,11 +149,11 @@ export function ActiveJobs() {
             <div className="flex items-center justify-between mb-2">
               <div className="flex items-center gap-2">
                 {getStatusIcon(job.status)}
-                <span className={`text-sm font-barlow font-medium ${getStatusColor(job.status)}`}>
+                <span className={`text-sm font-medium ${getStatusColor(job.status)}`}>
                   {job.status.charAt(0).toUpperCase() + job.status.slice(1)}
                 </span>
               </div>
-              <span className="text-sm font-barlow font-bold">
+              <span className="text-sm font-bold">
                 {Math.min(job.progress || 0, 100)}%
               </span>
             </div>
@@ -169,19 +169,19 @@ export function ActiveJobs() {
             </Progress.Root>
 
             {job.current_step && (
-              <p className="text-xs text-slate-400 dark:text-slate-500 font-barlow">
+              <p className="text-xs text-slate-400 dark:text-slate-500">
                 {job.current_step}
               </p>
             )}
 
             {job.updated_at && (
-              <p className="text-xs text-slate-500 dark:text-slate-400 font-barlow mt-1">
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
                 Updated {formatDate(job.updated_at)}
               </p>
             )}
 
             {job.completed_at && job.status === 'completed' && (
-              <p className="text-xs text-green-600 dark:text-green-400 font-barlow mt-1">
+              <p className="text-xs text-green-600 dark:text-green-400 mt-1">
                 Completed {formatDate(job.completed_at)}
               </p>
             )}
@@ -190,7 +190,7 @@ export function ActiveJobs() {
               <div className="mt-2 p-2 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded text-xs">
                 <div className="flex items-center gap-2">
                   <AlertCircle className="w-3 h-3 text-red-600 dark:text-red-400" />
-                  <span className="text-red-700 dark:text-red-300 font-barlow">
+                  <span className="text-red-700 dark:text-red-300">
                     {job.error}
                   </span>
                 </div>
@@ -202,7 +202,7 @@ export function ActiveJobs() {
 
       {activeJobs.some(job => job.status === 'processing' || job.status === 'pending') && (
         <div className="mt-4 pt-4 border-t border-slate-100 dark:border-slate-800">
-          <p className="text-xs text-slate-500 dark:text-slate-400 font-barlow text-center">
+          <p className="text-xs text-slate-500 dark:text-slate-400 text-center">
             Jobs update automatically • Click to view progress
           </p>
         </div>

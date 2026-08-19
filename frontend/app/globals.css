@@ -1,72 +1,95 @@
-@import '@fontsource/barlow-condensed/300.css';
-@import '@fontsource/barlow-condensed/400.css';
-@import '@fontsource/barlow-condensed/500.css';
-@import '@fontsource/barlow-condensed/600.css';
-@import '@fontsource/barlow-condensed/700.css';
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
-    --primary: 221.2 83.2% 53.3%;
-    --primary-foreground: 210 40% 98%;
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 221.2 83.2% 53.3%;
-    --radius: 0.5rem;
+    --background: 0 0% 98%;
+    --foreground: 222 47% 11%;
+    --card: 0 0% 100%;
+    --card-foreground: 222 47% 11%;
+    --muted: 210 40% 96%;
+    --muted-foreground: 215 16% 47%;
+    --primary: 243 75% 59%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 210 40% 96%;
+    --secondary-foreground: 222 47% 11%;
+    --accent: 226 100% 97%;
+    --accent-foreground: 243 75% 40%;
+    --destructive: 350 89% 60%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 214 32% 91%;
+    --input: 214 32% 91%;
+    --ring: 243 75% 59%;
+    --radius: 0.75rem;
   }
-
   .dark {
-    --background: 222.2 84% 4.9%;
+    --background: 222 47% 6%;
     --foreground: 210 40% 98%;
-    --primary: 217.2 91.2% 59.8%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-    --secondary: 217.2 32.6% 17.5%;
+    --card: 222 44% 9%;
+    --card-foreground: 210 40% 98%;
+    --muted: 217 33% 14%;
+    --muted-foreground: 215 20% 65%;
+    --primary: 239 84% 67%;
+    --primary-foreground: 222 47% 6%;
+    --secondary: 217 33% 14%;
     --secondary-foreground: 210 40% 98%;
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 224.3 76.3% 48%;
+    --accent: 243 40% 16%;
+    --accent-foreground: 239 84% 80%;
+    --destructive: 350 89% 60%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 217 33% 17%;
+    --input: 217 33% 17%;
+    --ring: 239 84% 67%;
   }
-}
-
-@layer base {
   * {
-    border-color: hsl(var(--border));
+    @apply border-border;
+  }
+  html {
+    @apply antialiased;
   }
   body {
-    @apply bg-slate-50 text-slate-900 font-barlow;
-    background: linear-gradient(to bottom right, rgb(248 250 252), rgb(219 234 254));
+    @apply bg-background text-foreground;
+    font-feature-settings: "cv11", "ss01";
   }
-  .dark body {
-    @apply bg-slate-950 text-slate-50;
-    background: linear-gradient(to bottom right, rgb(2 6 23), rgb(30 58 138));
+  ::selection {
+    @apply bg-indigo-200 text-slate-900;
   }
 }
 
 @layer utilities {
-  .glass-morphism {
-    @apply backdrop-blur-lg bg-white/10 border border-white/20;
+  .text-gradient {
+    @apply bg-gradient-to-r from-indigo-600 to-violet-600 bg-clip-text text-transparent;
   }
-  
-  .glass-morphism-dark {
-    @apply backdrop-blur-lg bg-black/20 border border-white/10;
+  .bg-gradient-primary {
+    @apply bg-gradient-to-r from-indigo-600 to-violet-600;
   }
+  .bg-grid {
+    background-image:
+      linear-gradient(to right, rgb(15 23 42 / 0.04) 1px, transparent 1px),
+      linear-gradient(to bottom, rgb(15 23 42 / 0.04) 1px, transparent 1px);
+    background-size: 32px 32px;
+  }
+  .dark .bg-grid {
+    background-image:
+      linear-gradient(to right, rgb(255 255 255 / 0.04) 1px, transparent 1px),
+      linear-gradient(to bottom, rgb(255 255 255 / 0.04) 1px, transparent 1px);
+  }
+  .scrollbar-thin {
+    scrollbar-width: thin;
+  }
+}
+
+.hljs {
+  @apply block overflow-x-auto;
+}
+.prose pre {
+  @apply rounded-lg bg-slate-950 text-slate-100;
+}
+.prose code:not(pre code) {
+  @apply rounded bg-muted px-1.5 py-0.5 text-[0.9em] font-normal text-indigo-700 dark:text-indigo-300;
+}
+.prose code:not(pre code)::before,
+.prose code:not(pre code)::after {
+  content: none;
 }

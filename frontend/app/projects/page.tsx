@@ -86,7 +86,7 @@ export default function ProjectsPage() {
       <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-slate-950 dark:to-blue-950 flex items-center justify-center">
         <div className="text-center">
           <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-slate-600 dark:text-slate-400 font-barlow">Loading projects...</p>
+          <p className="text-slate-600 dark:text-slate-400">Loading projects...</p>
         </div>
       </div>
     )
@@ -108,7 +108,7 @@ export default function ProjectsPage() {
                 <Home className="w-5 h-5" />
               </button>
               <ChevronRight className="w-4 h-4 text-slate-400" />
-              <span className="text-sm font-barlow text-slate-600 dark:text-slate-400">
+              <span className="text-sm text-slate-600 dark:text-slate-400">
                 Projects
               </span>
             </div>
@@ -138,8 +138,8 @@ export default function ProjectsPage() {
           {/* Main Header */}
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-barlow font-bold tracking-tight">Projects</h1>
-              <p className="text-slate-600 dark:text-slate-400 font-barlow">
+              <h1 className="text-3xl font-bold tracking-tight">Projects</h1>
+              <p className="text-slate-600 dark:text-slate-400">
                 Manage your tutorial generation projects ({projects.length} total)
               </p>
             </div>
@@ -147,7 +147,7 @@ export default function ProjectsPage() {
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               onClick={() => router.push('/new-project')}
-              className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-lg font-barlow font-semibold hover:from-blue-600 hover:to-purple-700 transition-all shadow-lg hover:shadow-xl"
+              className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-lg font-semibold hover:from-blue-600 hover:to-purple-700 transition-all shadow-lg hover:shadow-xl"
             >
               <Plus className="w-5 h-5" />
               New Project
@@ -169,7 +169,7 @@ export default function ProjectsPage() {
                 placeholder="Search projects..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg font-barlow placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
 
@@ -177,7 +177,7 @@ export default function ProjectsPage() {
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg font-barlow focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
               <option value="all">All Status</option>
               <option value="pending">Pending</option>
@@ -194,8 +194,8 @@ export default function ProjectsPage() {
             <div className="w-24 h-24 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-4">
               <Plus className="w-12 h-12 text-slate-400" />
             </div>
-            <h3 className="text-xl font-barlow font-semibold mb-2">No projects found</h3>
-            <p className="text-slate-600 dark:text-slate-400 font-barlow mb-6">
+            <h3 className="text-xl font-semibold mb-2">No projects found</h3>
+            <p className="text-slate-600 dark:text-slate-400 mb-6">
               {searchQuery || statusFilter !== 'all' 
                 ? 'No projects match your search criteria'
                 : 'Get started by creating your first tutorial project'
@@ -203,7 +203,7 @@ export default function ProjectsPage() {
             </p>
             <button
               onClick={() => router.push('/new-project')}
-              className="px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-lg font-barlow font-semibold hover:from-blue-600 hover:to-purple-700 transition-all"
+              className="px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-lg font-semibold hover:from-blue-600 hover:to-purple-700 transition-all"
             >
               Create New Project
             </button>
@@ -234,8 +234,8 @@ export default function ProjectsPage() {
                         )}
                       </div>
                       <div>
-                        <h3 className="font-barlow font-semibold text-lg">{project.name}</h3>
-                        <p className="text-sm text-slate-600 dark:text-slate-400 font-barlow truncate max-w-48">
+                        <h3 className="font-semibold text-lg">{project.name}</h3>
+                        <p className="text-sm text-slate-600 dark:text-slate-400 truncate max-w-48">
                           {project.source}
                         </p>
                       </div>
@@ -252,7 +252,7 @@ export default function ProjectsPage() {
                           {(project.status === 'processing' || project.status === 'pending') && project.job_id && (
                             <>
                               <DropdownMenu.Item 
-                                className="flex items-center gap-2 px-3 py-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-md cursor-pointer font-barlow"
+                                className="flex items-center gap-2 px-3 py-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-md cursor-pointer"
                                 onClick={() => router.push(`/progress/${project.job_id}`)}
                               >
                                 <Clock className="w-4 h-4" />
@@ -262,7 +262,7 @@ export default function ProjectsPage() {
                             </>
                           )}
                           <DropdownMenu.Item 
-                            className="flex items-center gap-2 px-3 py-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-md cursor-pointer font-barlow"
+                            className="flex items-center gap-2 px-3 py-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-md cursor-pointer"
                             onClick={() => router.push(`/projects/${project.id}`)}
                           >
                             <Eye className="w-4 h-4" />
@@ -272,7 +272,7 @@ export default function ProjectsPage() {
                             <>
                               <DropdownMenu.Separator className="my-1 h-px bg-slate-200 dark:bg-slate-800" />
                               <DropdownMenu.Item 
-                                className="flex items-center gap-2 px-3 py-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-md cursor-pointer font-barlow text-green-600 dark:text-green-400"
+                                className="flex items-center gap-2 px-3 py-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-md cursor-pointer text-green-600 dark:text-green-400"
                                 onClick={() => window.open(`http://localhost:8000/projects/${project.id}/download/pdf`, '_blank')}
                               >
                                 <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
@@ -284,7 +284,7 @@ export default function ProjectsPage() {
                           )}
                           <DropdownMenu.Separator className="my-1 h-px bg-slate-200 dark:bg-slate-800" />
                           <DropdownMenu.Item 
-                            className="flex items-center gap-2 px-3 py-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-md cursor-pointer font-barlow text-red-600 dark:text-red-400"
+                            className="flex items-center gap-2 px-3 py-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-md cursor-pointer text-red-600 dark:text-red-400"
                             onClick={() => handleDeleteProject(project)}
                           >
                             <Trash2 className="w-4 h-4" />
@@ -301,7 +301,7 @@ export default function ProjectsPage() {
                       {project.status === 'completed' && (
                         <>
                           <CheckCircle className="w-4 h-4 text-green-600 dark:text-green-400" />
-                          <span className="text-sm font-barlow text-green-600 dark:text-green-400">
+                          <span className="text-sm text-green-600 dark:text-green-400">
                             Completed
                           </span>
                         </>
@@ -309,7 +309,7 @@ export default function ProjectsPage() {
                       {project.status === 'processing' && (
                         <>
                           <Clock className="w-4 h-4 text-yellow-600 dark:text-yellow-400" />
-                          <span className="text-sm font-barlow text-yellow-600 dark:text-yellow-400">
+                          <span className="text-sm text-yellow-600 dark:text-yellow-400">
                             Processing
                           </span>
                         </>
@@ -317,13 +317,13 @@ export default function ProjectsPage() {
                       {project.status === 'failed' && (
                         <>
                           <XCircle className="w-4 h-4 text-red-600 dark:text-red-400" />
-                          <span className="text-sm font-barlow text-red-600 dark:text-red-400">
+                          <span className="text-sm text-red-600 dark:text-red-400">
                             Failed
                           </span>
                         </>
                       )}
                     </div>
-                    <span className="text-sm font-barlow font-semibold">
+                    <span className="text-sm font-semibold">
                       {Math.min(project.progress || 0, 100)}%
                     </span>
                   </div>
@@ -344,7 +344,7 @@ export default function ProjectsPage() {
                   </Progress.Root>
 
                   {/* Meta Info */}
-                  <div className="flex items-center justify-between text-sm text-slate-500 dark:text-slate-400 font-barlow mb-4">
+                  <div className="flex items-center justify-between text-sm text-slate-500 dark:text-slate-400 mb-4">
                     <span>Created {formatDate(project.created_at)}</span>
                     {project.status === 'completed' && project.completed_at && (
                       <span>Completed {formatDate(project.completed_at)}</span>
@@ -356,7 +356,7 @@ export default function ProjectsPage() {
                     {project.status === 'processing' || project.status === 'pending' ? (
                       <button
                         onClick={() => project.job_id && router.push(`/progress/${project.job_id}`)}
-                        className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-blue-50 hover:bg-blue-100 dark:bg-blue-900/20 dark:hover:bg-blue-900/30 text-blue-600 dark:text-blue-400 text-sm font-barlow rounded-lg transition-colors"
+                        className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-blue-50 hover:bg-blue-100 dark:bg-blue-900/20 dark:hover:bg-blue-900/30 text-blue-600 dark:text-blue-400 text-sm rounded-lg transition-colors"
                       >
                         <Clock className="w-4 h-4" />
                         View Progress
@@ -365,14 +365,14 @@ export default function ProjectsPage() {
                       <>
                         <button
                           onClick={() => router.push(`/projects/${project.id}`)}
-                          className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-green-50 hover:bg-green-100 dark:bg-green-900/20 dark:hover:bg-green-900/30 text-green-600 dark:text-green-400 text-sm font-barlow rounded-lg transition-colors"
+                          className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-green-50 hover:bg-green-100 dark:bg-green-900/20 dark:hover:bg-green-900/30 text-green-600 dark:text-green-400 text-sm rounded-lg transition-colors"
                         >
                           <Eye className="w-4 h-4" />
                           View
                         </button>
                         <button
                           onClick={() => window.open(`http://localhost:8000/projects/${project.id}/download/pdf`, '_blank')}
-                          className="flex items-center justify-center gap-2 px-3 py-2 bg-red-50 hover:bg-red-100 dark:bg-red-900/20 dark:hover:bg-red-900/30 text-red-600 dark:text-red-400 text-sm font-barlow rounded-lg transition-colors"
+                          className="flex items-center justify-center gap-2 px-3 py-2 bg-red-50 hover:bg-red-100 dark:bg-red-900/20 dark:hover:bg-red-900/30 text-red-600 dark:text-red-400 text-sm rounded-lg transition-colors"
                           title="Download PDF"
                         >
                           <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
@@ -383,7 +383,7 @@ export default function ProjectsPage() {
                     ) : (
                       <button
                         onClick={() => router.push(`/projects/${project.id}`)}
-                        className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-slate-50 hover:bg-slate-100 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-400 text-sm font-barlow rounded-lg transition-colors"
+                        className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-slate-50 hover:bg-slate-100 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-400 text-sm rounded-lg transition-colors"
                       >
                         <Eye className="w-4 h-4" />
                         View Details
@@ -406,28 +406,28 @@ export default function ProjectsPage() {
           >
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
               <div className="text-center">
-                <div className="text-2xl font-barlow font-bold text-blue-600 dark:text-blue-400">
+                <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
                   {projects.length}
                 </div>
-                <div className="text-sm text-slate-600 dark:text-slate-400 font-barlow">Total Projects</div>
+                <div className="text-sm text-slate-600 dark:text-slate-400">Total Projects</div>
               </div>
               <div className="text-center">
-                <div className="text-2xl font-barlow font-bold text-green-600 dark:text-green-400">
+                <div className="text-2xl font-bold text-green-600 dark:text-green-400">
                   {projects.filter(p => p.status === 'completed').length}
                 </div>
-                <div className="text-sm text-slate-600 dark:text-slate-400 font-barlow">Completed</div>
+                <div className="text-sm text-slate-600 dark:text-slate-400">Completed</div>
               </div>
               <div className="text-center">
-                <div className="text-2xl font-barlow font-bold text-yellow-600 dark:text-yellow-400">
+                <div className="text-2xl font-bold text-yellow-600 dark:text-yellow-400">
                   {projects.filter(p => p.status === 'processing' || p.status === 'pending').length}
                 </div>
-                <div className="text-sm text-slate-600 dark:text-slate-400 font-barlow">In Progress</div>
+                <div className="text-sm text-slate-600 dark:text-slate-400">In Progress</div>
               </div>
               <div className="text-center">
-                <div className="text-2xl font-barlow font-bold text-red-600 dark:text-red-400">
+                <div className="text-2xl font-bold text-red-600 dark:text-red-400">
                   {projects.filter(p => p.status === 'failed').length}
                 </div>
-                <div className="text-sm text-slate-600 dark:text-slate-400 font-barlow">Failed</div>
+                <div className="text-sm text-slate-600 dark:text-slate-400">Failed</div>
               </div>
             </div>
           </motion.div>
@@ -444,14 +444,14 @@ export default function ProjectsPage() {
             <div className="flex items-center gap-4">
               <button
                 onClick={() => router.push('/')}
-                className="flex items-center gap-2 px-4 py-2 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors font-barlow"
+                className="flex items-center gap-2 px-4 py-2 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors"
               >
                 <Home className="w-4 h-4" />
                 Dashboard
               </button>
               <button
                 onClick={() => router.push('/new-project')}
-                className="flex items-center gap-2 px-4 py-2 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors font-barlow"
+                className="flex items-center gap-2 px-4 py-2 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors"
               >
                 <Plus className="w-4 h-4" />
                 New Project
@@ -470,23 +470,23 @@ export default function ProjectsPage() {
         <Dialog.Portal>
           <Dialog.Overlay className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40" />
           <Dialog.Content className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-md bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 z-50 p-6">
-            <Dialog.Title className="text-xl font-barlow font-bold mb-4">
+            <Dialog.Title className="text-xl font-bold mb-4">
               Delete Project
             </Dialog.Title>
-            <Dialog.Description className="text-slate-600 dark:text-slate-400 font-barlow mb-6">
+            <Dialog.Description className="text-slate-600 dark:text-slate-400 mb-6">
               Are you sure you want to delete "{projectToDelete?.name}"? This action cannot be undone and will permanently remove all generated content.
             </Dialog.Description>
             <div className="flex gap-4">
               <button
                 onClick={() => setDeleteDialogOpen(false)}
-                className="flex-1 px-4 py-2 border border-slate-200 dark:border-slate-700 rounded-lg font-barlow font-semibold hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
+                className="flex-1 px-4 py-2 border border-slate-200 dark:border-slate-700 rounded-lg font-semibold hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
               >
                 Cancel
               </button>
               <button
                 onClick={confirmDelete}
                 disabled={deleteProjectMutation.isPending}
-                className="flex-1 px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg font-barlow font-semibold transition-colors disabled:opacity-50"
+                className="flex-1 px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg font-semibold transition-colors disabled:opacity-50"
               >
                 {deleteProjectMutation.isPending ? 'Deleting...' : 'Delete'}
               </button>

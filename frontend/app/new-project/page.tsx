@@ -21,8 +21,8 @@ export default function NewProjectPage() {
             <ArrowLeft className="w-5 h-5" />
           </button>
           <div>
-            <h1 className="text-2xl font-barlow font-bold">Create New Project</h1>
-            <p className="text-sm text-slate-600 dark:text-slate-400 font-barlow">
+            <h1 className="text-2xl font-bold">Create New Project</h1>
+            <p className="text-sm text-slate-600 dark:text-slate-400">
               Configure your tutorial generation settings
             </p>
           </div>

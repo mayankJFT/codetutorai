@@ -19,7 +19,7 @@ export function Header() {
           <input
             type="text"
             placeholder="Search projects, tutorials..."
-            className="w-full pl-10 pr-4 py-2 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg font-barlow placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full pl-10 pr-4 py-2 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           />
         </div>
       </div>
@@ -41,21 +41,21 @@ export function Header() {
               sideOffset={5}
             >
               <DropdownMenu.Item
-                className="flex items-center gap-2 px-3 py-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-md cursor-pointer font-barlow"
+                className="flex items-center gap-2 px-3 py-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-md cursor-pointer"
                 onClick={() => setTheme('light')}
               >
                 <Sun className="w-4 h-4" />
                 Light
               </DropdownMenu.Item>
               <DropdownMenu.Item
-                className="flex items-center gap-2 px-3 py-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-md cursor-pointer font-barlow"
+                className="flex items-center gap-2 px-3 py-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-md cursor-pointer"
                 onClick={() => setTheme('dark')}
               >
                 <Moon className="w-4 h-4" />
                 Dark
               </DropdownMenu.Item>
               <DropdownMenu.Item
-                className="flex items-center gap-2 px-3 py-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-md cursor-pointer font-barlow"
+                className="flex items-center gap-2 px-3 py-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-md cursor-pointer"
                 onClick={() => setTheme('system')}
               >
                 <Monitor className="w-4 h-4" />
@@ -79,7 +79,7 @@ export function Header() {
                 <User className="w-5 h-5 text-white" />
               </div>
               <div className="text-left hidden md:block">
-                <p className="text-sm font-barlow font-semibold">{user?.full_name}</p>
+                <p className="text-sm font-semibold">{user?.full_name}</p>
                 <p className="text-xs text-slate-500 dark:text-slate-400">{user?.email}</p>
               </div>
             </button>
@@ -89,13 +89,13 @@ export function Header() {
               className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg shadow-lg p-2 min-w-[200px]"
               sideOffset={5}
             >
-              <DropdownMenu.Item className="flex items-center gap-2 px-3 py-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-md cursor-pointer font-barlow">
+              <DropdownMenu.Item className="flex items-center gap-2 px-3 py-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-md cursor-pointer">
                 <Settings className="w-4 h-4" />
                 Settings
               </DropdownMenu.Item>
               <DropdownMenu.Separator className="my-1 h-px bg-slate-200 dark:bg-slate-800" />
               <DropdownMenu.Item 
-                className="flex items-center gap-2 px-3 py-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-md cursor-pointer font-barlow text-red-600 dark:text-red-400"
+                className="flex items-center gap-2 px-3 py-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-md cursor-pointer text-red-600 dark:text-red-400"
                 onClick={logout}
               >
                 <LogOut className="w-4 h-4" />

@@ -10,8 +10,8 @@ export function DashboardContent() {
     <div className="p-6 space-y-6">
       {/* Page Header */}
       <div>
-        <h1 className="text-3xl font-barlow font-bold tracking-tight">Dashboard</h1>
-        <p className="text-slate-600 dark:text-slate-400 font-barlow">
+        <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
+        <p className="text-slate-600 dark:text-slate-400">
           Welcome back! Here's an overview of your tutorial generation activity.
         </p>
       </div>

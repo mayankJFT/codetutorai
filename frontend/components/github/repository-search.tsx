@@ -51,7 +51,7 @@ export function RepositorySearch({ onSelect }: RepositorySearchProps) {
   return (
     <Dialog.Root open={isOpen} onOpenChange={setIsOpen}>
       <Dialog.Trigger asChild>
-        <button className="flex items-center gap-2 px-4 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg transition-colors font-barlow">
+        <button className="flex items-center gap-2 px-4 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg transition-colors">
           <Search className="w-4 h-4" />
           Search GitHub Repositories
         </button>
@@ -61,7 +61,7 @@ export function RepositorySearch({ onSelect }: RepositorySearchProps) {
         <Dialog.Overlay className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40" />
         <Dialog.Content className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-4xl max-h-[90vh] bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 z-50 overflow-hidden">
           <div className="p-6 border-b border-slate-200 dark:border-slate-800">
-            <Dialog.Title className="text-2xl font-barlow font-bold mb-4">
+            <Dialog.Title className="text-2xl font-bold mb-4">
               Search GitHub Repositories
             </Dialog.Title>
 
@@ -74,13 +74,13 @@ export function RepositorySearch({ onSelect }: RepositorySearchProps) {
                     placeholder="Search repositories..."
                     value={searchParams.query}
                     onChange={(e) => setSearchParams(prev => ({ ...prev, query: e.target.value }))}
-                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg font-barlow placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
                 </div>
                 <select
                   value={searchParams.language}
                   onChange={(e) => setSearchParams(prev => ({ ...prev, language: e.target.value }))}
-                  className="px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg font-barlow focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 >
                   <option value="">All Languages</option>
                   {PROGRAMMING_LANGUAGES.map(lang => (
@@ -93,7 +93,7 @@ export function RepositorySearch({ onSelect }: RepositorySearchProps) {
                 <select
                   value={searchParams.sort}
                   onChange={(e) => setSearchParams(prev => ({ ...prev, sort: e.target.value }))}
-                  className="px-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg font-barlow focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="px-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 >
                   <option value="stars">Sort by Stars</option>
                   <option value="forks">Sort by Forks</option>
@@ -102,7 +102,7 @@ export function RepositorySearch({ onSelect }: RepositorySearchProps) {
                 <select
                   value={searchParams.order}
                   onChange={(e) => setSearchParams(prev => ({ ...prev, order: e.target.value }))}
-                  className="px-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg font-barlow focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="px-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 >
                   <option value="desc">Descending</option>
                   <option value="asc">Ascending</option>
@@ -116,13 +116,13 @@ export function RepositorySearch({ onSelect }: RepositorySearchProps) {
             {isLoading && debouncedQuery && (
               <div className="text-center py-8">
                 <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-                <p className="text-slate-600 dark:text-slate-400 font-barlow">Searching repositories...</p>
+                <p className="text-slate-600 dark:text-slate-400">Searching repositories...</p>
               </div>
             )}
 
             {error && (
               <div className="text-center py-8">
-                <p className="text-red-600 dark:text-red-400 font-barlow">
+                <p className="text-red-600 dark:text-red-400">
                   Failed to search repositories. Please try again.
                 </p>
               </div>
@@ -131,7 +131,7 @@ export function RepositorySearch({ onSelect }: RepositorySearchProps) {
             {!debouncedQuery.trim() && (
               <div className="text-center py-8">
                 <Search className="w-12 h-12 text-slate-400 mx-auto mb-4" />
-                <p className="text-slate-600 dark:text-slate-400 font-barlow">
+                <p className="text-slate-600 dark:text-slate-400">
                   Enter a search query to find repositories
                 </p>
               </div>
@@ -139,7 +139,7 @@ export function RepositorySearch({ onSelect }: RepositorySearchProps) {
 
             {searchResults && searchResults.repositories.length === 0 && debouncedQuery.trim() && (
               <div className="text-center py-8">
-                <p className="text-slate-600 dark:text-slate-400 font-barlow">
+                <p className="text-slate-600 dark:text-slate-400">
                   No repositories found for "{debouncedQuery}"
                 </p>
               </div>
@@ -157,10 +157,10 @@ export function RepositorySearch({ onSelect }: RepositorySearchProps) {
                 >
                   <div className="flex items-start justify-between mb-3">
                     <div className="flex-1">
-                      <h3 className="text-lg font-barlow font-semibold text-blue-600 dark:text-blue-400 mb-1">
+                      <h3 className="text-lg font-semibold text-blue-600 dark:text-blue-400 mb-1">
                         {repo.full_name}
                       </h3>
-                      <p className="text-sm text-slate-600 dark:text-slate-400 font-barlow mb-3 line-clamp-2">
+                      <p className="text-sm text-slate-600 dark:text-slate-400 mb-3 line-clamp-2">
                         {repo.description || 'No description available'}
                       </p>
                     </div>
@@ -184,7 +184,7 @@ export function RepositorySearch({ onSelect }: RepositorySearchProps) {
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-4 text-sm text-slate-500 dark:text-slate-400 font-barlow">
+                  <div className="flex items-center gap-4 text-sm text-slate-500 dark:text-slate-400">
                     {repo.language && (
                       <span className="px-2 py-1 bg-slate-100 dark:bg-slate-800 rounded-md">
                         {repo.language}
@@ -209,7 +209,7 @@ export function RepositorySearch({ onSelect }: RepositorySearchProps) {
 
             {searchResults && searchResults.repositories.length > 0 && (
               <div className="text-center py-4">
-                <p className="text-sm text-slate-500 dark:text-slate-400 font-barlow">
+                <p className="text-sm text-slate-500 dark:text-slate-400">
                   Showing {searchResults.repositories.length} of {searchResults.total_count.toLocaleString()} results
                 </p>
               </div>

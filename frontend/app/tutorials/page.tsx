@@ -111,7 +111,7 @@ export default function TutorialsPage() {
       <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-slate-950 dark:to-blue-950 flex items-center justify-center">
         <div className="text-center">
           <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-slate-600 dark:text-slate-400 font-barlow">Loading tutorials...</p>
+          <p className="text-slate-600 dark:text-slate-400">Loading tutorials...</p>
         </div>
       </div>
     )
@@ -127,8 +127,8 @@ export default function TutorialsPage() {
               <BookOpen className="w-5 h-5 text-white" />
             </div>
             <div>
-              <h1 className="text-3xl font-barlow font-bold tracking-tight">Generated Tutorials</h1>
-              <p className="text-slate-600 dark:text-slate-400 font-barlow">
+              <h1 className="text-3xl font-bold tracking-tight">Generated Tutorials</h1>
+              <p className="text-slate-600 dark:text-slate-400">
                 Browse, read, and manage your generated tutorials
               </p>
             </div>
@@ -137,28 +137,28 @@ export default function TutorialsPage() {
           {/* Statistics */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
             <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-4">
-              <div className="text-2xl font-barlow font-bold text-purple-600 dark:text-purple-400">
+              <div className="text-2xl font-bold text-purple-600 dark:text-purple-400">
                 {completedProjects.length}
               </div>
-              <div className="text-sm text-slate-600 dark:text-slate-400 font-barlow">Total Tutorials</div>
+              <div className="text-sm text-slate-600 dark:text-slate-400">Total Tutorials</div>
             </div>
             <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-4">
-              <div className="text-2xl font-barlow font-bold text-blue-600 dark:text-blue-400">
+              <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
                 {completedProjects.filter(p => p.type === 'github').length}
               </div>
-              <div className="text-sm text-slate-600 dark:text-slate-400 font-barlow">GitHub Repos</div>
+              <div className="text-sm text-slate-600 dark:text-slate-400">GitHub Repos</div>
             </div>
             <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-4">
-              <div className="text-2xl font-barlow font-bold text-green-600 dark:text-green-400">
+              <div className="text-2xl font-bold text-green-600 dark:text-green-400">
                 {completedProjects.filter(p => new Date(p.completed_at!).getTime() > Date.now() - 7 * 24 * 60 * 60 * 1000).length}
               </div>
-              <div className="text-sm text-slate-600 dark:text-slate-400 font-barlow">This Week</div>
+              <div className="text-sm text-slate-600 dark:text-slate-400">This Week</div>
             </div>
             <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-4">
-              <div className="text-2xl font-barlow font-bold text-yellow-600 dark:text-yellow-400">
+              <div className="text-2xl font-bold text-yellow-600 dark:text-yellow-400">
                 {starredTutorials.size}
               </div>
-              <div className="text-sm text-slate-600 dark:text-slate-400 font-barlow">Starred</div>
+              <div className="text-sm text-slate-600 dark:text-slate-400">Starred</div>
             </div>
           </div>
         </div>
@@ -174,7 +174,7 @@ export default function TutorialsPage() {
                 placeholder="Search tutorials..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg font-barlow placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
 
@@ -182,7 +182,7 @@ export default function TutorialsPage() {
             <select
               value={filterBy}
               onChange={(e) => setFilterBy(e.target.value as FilterOption)}
-              className="px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg font-barlow focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
               <option value="all">All Tutorials</option>
               <option value="recent">Recent (7 days)</option>
@@ -221,8 +221,8 @@ export default function TutorialsPage() {
             <div className="w-24 h-24 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-4">
               <BookOpen className="w-12 h-12 text-slate-400" />
             </div>
-            <h3 className="text-xl font-barlow font-semibold mb-2">No tutorials found</h3>
-            <p className="text-slate-600 dark:text-slate-400 font-barlow mb-6">
+            <h3 className="text-xl font-semibold mb-2">No tutorials found</h3>
+            <p className="text-slate-600 dark:text-slate-400 mb-6">
               {searchQuery || filterBy !== 'all' 
                 ? 'No tutorials match your search criteria'
                 : completedProjects.length === 0
@@ -232,7 +232,7 @@ export default function TutorialsPage() {
             </p>
             <button
               onClick={() => router.push('/new-project')}
-              className="px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-600 text-white rounded-lg font-barlow font-semibold hover:from-purple-600 hover:to-pink-700 transition-all"
+              className="px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-600 text-white rounded-lg font-semibold hover:from-purple-600 hover:to-pink-700 transition-all"
             >
               Generate Your First Tutorial
             </button>
@@ -263,8 +263,8 @@ export default function TutorialsPage() {
                         )}
                       </div>
                       <div>
-                        <h3 className="font-barlow font-semibold text-lg">{project.name}</h3>
-                        <p className="text-sm text-slate-600 dark:text-slate-400 font-barlow truncate max-w-48">
+                        <h3 className="font-semibold text-lg">{project.name}</h3>
+                        <p className="text-sm text-slate-600 dark:text-slate-400 truncate max-w-48">
                           {project.source}
                         </p>
                       </div>
@@ -284,7 +284,7 @@ export default function TutorialsPage() {
 
                   {/* Tutorial Info */}
                   <div className="space-y-3 mb-4">
-                    <div className="flex items-center justify-between text-sm text-slate-600 dark:text-slate-400 font-barlow">
+                    <div className="flex items-center justify-between text-sm text-slate-600 dark:text-slate-400">
                       <span>Generated {formatDate(project.completed_at!)}</span>
                       <span className="flex items-center gap-1">
                         <Code className="w-4 h-4" />
@@ -293,7 +293,7 @@ export default function TutorialsPage() {
                     </div>
                     
                     {project.result && (
-                      <div className="text-sm text-slate-500 dark:text-slate-400 font-barlow">
+                      <div className="text-sm text-slate-500 dark:text-slate-400">
                         {project.result.abstractions?.length || 0} concepts • {project.result.chapters?.length || 0} chapters
                       </div>
                     )}
@@ -303,7 +303,7 @@ export default function TutorialsPage() {
                   <div className="flex gap-2">
                     <button
                       onClick={() => router.push(`/projects/${project.id}`)}
-                      className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-gradient-to-r from-purple-500 to-pink-600 text-white rounded-lg font-barlow font-semibold hover:from-purple-600 hover:to-pink-700 transition-all text-sm"
+                      className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-gradient-to-r from-purple-500 to-pink-600 text-white rounded-lg font-semibold hover:from-purple-600 hover:to-pink-700 transition-all text-sm"
                     >
                       <Eye className="w-4 h-4" />
                       Read Tutorial
@@ -355,7 +355,7 @@ export default function TutorialsPage() {
                     
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-1">
-                        <h3 className="text-lg font-barlow font-semibold">{project.name}</h3>
+                        <h3 className="text-lg font-semibold">{project.name}</h3>
                         <button
                           onClick={() => toggleStar(project.id)}
                           className="p-1 hover:bg-slate-100 dark:hover:bg-slate-800 rounded transition-colors"
@@ -368,11 +368,11 @@ export default function TutorialsPage() {
                         </button>
                       </div>
                       
-                      <p className="text-sm text-slate-600 dark:text-slate-400 font-barlow mb-2">
+                      <p className="text-sm text-slate-600 dark:text-slate-400 mb-2">
                         {project.source}
                       </p>
                       
-                      <div className="flex items-center gap-4 text-sm text-slate-500 dark:text-slate-400 font-barlow">
+                      <div className="flex items-center gap-4 text-sm text-slate-500 dark:text-slate-400">
                         <span>Generated {formatDate(project.completed_at!)}</span>
                         <span>{project.config.language || 'English'}</span>
                         {project.result && (
@@ -401,7 +401,7 @@ export default function TutorialsPage() {
                     
                     <button
                       onClick={() => router.push(`/projects/${project.id}`)}
-                      className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-600 text-white rounded-lg font-barlow font-semibold hover:from-purple-600 hover:to-pink-700 transition-all"
+                      className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-600 text-white rounded-lg font-semibold hover:from-purple-600 hover:to-pink-700 transition-all"
                     >
                       Read Tutorial
                       <ArrowRight className="w-4 h-4" />
