@@ -31,7 +31,14 @@ export function AnimatedNumber({
         if (ref.current) ref.current.textContent = format(v)
       },
     })
-    return () => controls.stop()
+    // rAF is paused in background tabs; make sure the final value always lands.
+    const settle = window.setTimeout(() => {
+      if (ref.current) ref.current.textContent = format(value)
+    }, duration * 1000 + 150)
+    return () => {
+      controls.stop()
+      window.clearTimeout(settle)
+    }
   }, [value, inView, reduce, duration, format])
 
   return <span ref={ref}>{reduce ? format(value) : format(0)}</span>

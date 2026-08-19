@@ -1,132 +1,81 @@
 'use client'
 
-import { motion } from 'framer-motion'
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 import { useQuery } from '@tanstack/react-query'
-import { tutorialAPI } from '@/lib/api'
+import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
+import { tutorialAPI, type Project } from '@/lib/api'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Skeleton } from '@/components/ui/skeleton'
 
-// Generate mock weekly data based on current projects if no real data is available
-const generateWeeklyData = (projects: any[] = []) => {
-  const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+function weekly(projects: Project[]) {
   const now = new Date()
-  
-  return days.map((day, index) => {
-    const dayDate = new Date(now)
-    dayDate.setDate(now.getDate() - (6 - index))
-    
-    // Filter projects created on this day
-    const dayProjects = projects.filter(project => {
-      const projectDate = new Date(project.created_at)
-      return projectDate.toDateString() === dayDate.toDateString()
-    })
-    
+  return Array.from({ length: 7 }).map((_, i) => {
+    const d = new Date(now)
+    d.setDate(now.getDate() - (6 - i))
+    const day = projects.filter((p) => new Date(p.created_at).toDateString() === d.toDateString())
     return {
-      name: day,
-      completed: dayProjects.filter(p => p.status === 'completed').length,
-      failed: dayProjects.filter(p => p.status === 'failed').length,
-      processing: dayProjects.filter(p => p.status === 'processing').length,
+      name: d.toLocaleDateString('en-US', { weekday: 'short' }),
+      completed: day.filter((p) => p.status === 'completed').length,
+      failed: day.filter((p) => p.status === 'failed').length,
+      processing: day.filter((p) => p.status === 'processing' || p.status === 'pending').length,
     }
   })
 }
 
 export function ActivityChart() {
-  const { data: projects = [], isLoading } = useQuery({
-    queryKey: ['projects'],
-    queryFn: () => tutorialAPI.getProjects(),
-    refetchInterval: 30000, // Refresh every 30 seconds
-  })
-
-  const data = generateWeeklyData(projects)
-
-  if (isLoading) {
-    return (
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.3 }}
-        className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-6"
-      >
-        <div className="mb-6">
-          <h2 className="text-xl font-bold">Weekly Activity</h2>
-          <p className="text-sm text-slate-600 dark:text-slate-400">
-            Tutorial generation activity over the past week
-          </p>
-        </div>
-        <div className="h-80 flex items-center justify-center">
-          <div className="animate-pulse space-y-4 w-full">
-            <div className="h-4 bg-slate-200 dark:bg-slate-700 rounded w-1/4" />
-            <div className="space-y-2">
-              <div className="h-48 bg-slate-200 dark:bg-slate-700 rounded" />
-            </div>
-          </div>
-        </div>
-      </motion.div>
-    )
-  }
-
-  const totalCompleted = data.reduce((sum, day) => sum + day.completed, 0)
-  const totalFailed = data.reduce((sum, day) => sum + day.failed, 0)
-  const totalProcessing = data.reduce((sum, day) => sum + day.processing, 0)
+  const { data: projects = [], isLoading } = useQuery({ queryKey: ['projects'], queryFn: tutorialAPI.getProjects, refetchInterval: 30000 })
+  const data = weekly(projects)
+  const total = projects.length
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 0.3 }}
-      className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-6"
-    >
-      <div className="mb-6">
-        <h2 className="text-xl font-bold">Weekly Activity</h2>
-        <p className="text-sm text-slate-600 dark:text-slate-400">
-          Tutorial generation activity over the past week
-        </p>
-        {totalCompleted + totalFailed + totalProcessing > 0 && (
-          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-            {totalCompleted + totalFailed + totalProcessing} total projects this week
-          </p>
+    <Card>
+      <CardHeader>
+        <CardTitle>Weekly activity</CardTitle>
+        <CardDescription>Tutorials generated over the last 7 days</CardDescription>
+      </CardHeader>
+      <CardContent>
+        {isLoading ? (
+          <Skeleton className="h-64 rounded-lg" />
+        ) : (
+          <div className="relative h-64">
+            {total === 0 && (
+              <p className="absolute inset-0 z-10 flex items-center justify-center text-sm text-muted-foreground">Activity will appear here once you generate a tutorial.</p>
+            )}
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={data} margin={{ top: 8, right: 8, left: -20, bottom: 0 }}>
+                <defs>
+                  <linearGradient id="gCompleted" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#4F46E5" stopOpacity={0.35} />
+                    <stop offset="100%" stopColor="#4F46E5" stopOpacity={0} />
+                  </linearGradient>
+                  <linearGradient id="gProcessing" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#F59E0B" stopOpacity={0.3} />
+                    <stop offset="100%" stopColor="#F59E0B" stopOpacity={0} />
+                  </linearGradient>
+                  <linearGradient id="gFailed" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#F43F5E" stopOpacity={0.3} />
+                    <stop offset="100%" stopColor="#F43F5E" stopOpacity={0} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
+                <XAxis dataKey="name" tickLine={false} axisLine={false} tick={{ fontSize: 12, fill: 'hsl(var(--muted-foreground))' }} />
+                <YAxis allowDecimals={false} tickLine={false} axisLine={false} tick={{ fontSize: 12, fill: 'hsl(var(--muted-foreground))' }} />
+                <Tooltip
+                  cursor={{ stroke: 'hsl(var(--border))' }}
+                  contentStyle={{ background: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: 10, fontSize: 12, color: 'hsl(var(--foreground))' }}
+                />
+                <Area type="monotone" dataKey="completed" name="Completed" stroke="#4F46E5" strokeWidth={2} fill="url(#gCompleted)" />
+                <Area type="monotone" dataKey="processing" name="Processing" stroke="#F59E0B" strokeWidth={2} fill="url(#gProcessing)" />
+                <Area type="monotone" dataKey="failed" name="Failed" stroke="#F43F5E" strokeWidth={2} fill="url(#gFailed)" />
+              </AreaChart>
+            </ResponsiveContainer>
+          </div>
         )}
-      </div>
-
-      <ResponsiveContainer width="100%" height={300}>
-        <BarChart data={data}>
-          <CartesianGrid strokeDasharray="3 3" className="stroke-slate-200 dark:stroke-slate-800" />
-          <XAxis 
-            dataKey="name" 
-            className=""
-            tick={{ fill: 'currentColor', fontSize: 12 }}
-          />
-          <YAxis 
-            className=""
-            tick={{ fill: 'currentColor', fontSize: 12 }}
-          />
-          <Tooltip 
-            contentStyle={{
-              backgroundColor: 'var(--background)',
-              border: '1px solid var(--border)',
-              borderRadius: '8px',
-              fontFamily: 'Barlow Condensed',
-            }}
-          />
-          <Bar dataKey="completed" fill="#3b82f6" radius={[4, 4, 0, 0]} />
-          <Bar dataKey="processing" fill="#f59e0b" radius={[4, 4, 0, 0]} />
-          <Bar dataKey="failed" fill="#ef4444" radius={[4, 4, 0, 0]} />
-        </BarChart>
-      </ResponsiveContainer>
-
-      <div className="flex items-center justify-center gap-6 mt-4">
-        <div className="flex items-center gap-2">
-          <div className="w-3 h-3 bg-blue-500 rounded-sm"></div>
-          <span className="text-sm text-slate-600 dark:text-slate-400">Completed</span>
+        <div className="mt-4 flex items-center gap-5 text-xs text-muted-foreground">
+          <span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-indigo-600" /> Completed</span>
+          <span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-amber-500" /> Processing</span>
+          <span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-rose-500" /> Failed</span>
         </div>
-        <div className="flex items-center gap-2">
-          <div className="w-3 h-3 bg-yellow-500 rounded-sm"></div>
-          <span className="text-sm text-slate-600 dark:text-slate-400">Processing</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="w-3 h-3 bg-red-500 rounded-sm"></div>
-          <span className="text-sm text-slate-600 dark:text-slate-400">Failed</span>
-        </div>
-      </div>
-    </motion.div>
+      </CardContent>
+    </Card>
   )
 }

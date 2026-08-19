@@ -97,6 +97,10 @@ export interface LogEntry {
 
 export interface JobStatus {
   id: string
+  name?: string
+  source?: string
+  type?: 'github' | 'local'
+  created_at?: string
   status: 'pending' | 'processing' | 'completed' | 'failed'
   progress: number
   current_step?: string
@@ -274,6 +278,9 @@ export interface DashboardStats {
   }
   active_jobs: Array<{
     id: string
+    name?: string
+    source?: string
+    type?: 'github' | 'local'
     status: string
     progress: number
     current_step?: string
