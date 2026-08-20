@@ -3,7 +3,7 @@ Enhanced FastAPI backend for CodeTutorAI Tutorial Generator with SQLite persiste
 """
 
 from dotenv import load_dotenv
-load_dotenv()
+load_dotenv(override=True)
 
 from fastapi import FastAPI, HTTPException, BackgroundTasks, Depends, status
 from fastapi.middleware.cors import CORSMiddleware
