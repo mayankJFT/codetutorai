@@ -78,6 +78,9 @@ if MONGODB_URL:
 else:
     db = SQLiteStore(SQLITE_PATH)
     print(f"✅ Using SQLite database at {SQLITE_PATH}")
+    if os.getenv("RENDER"):
+        print("⚠️  WARNING: running on Render without MONGODB_URL - SQLite is EPHEMERAL here; "
+              "all users and tutorials are wiped on every deploy/restart. Set MONGODB_URL.")
 
 users_collection = db["users"]
 projects_collection = db["projects"]
@@ -1051,7 +1054,12 @@ def run_tutorial_flow(job_id: str, config: ProjectConfig, user_id: str):
 
 @app.get("/")
 def root():
-    return {"message": "CodeTutor AI - Advanced Code Learning Platform", "version": "2.0.0", "features": ["Authentication", "SQLite", "GitHub Search", "PDF Generation"]}
+    return {
+        "message": "CodeTutor AI - Advanced Code Learning Platform",
+        "version": "2.0.0",
+        "storage": "mongodb" if MONGODB_URL else "sqlite (ephemeral on Render!)",
+        "features": ["Authentication", "GitHub Search", "PDF Generation"],
+    }
 
 # Authentication Routes
 @app.post("/auth/register", response_model=Token)
