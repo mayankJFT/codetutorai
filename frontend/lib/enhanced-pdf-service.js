@@ -319,7 +319,7 @@ class EnhancedPDFService {
           yPosition = this.renderEnhancedParagraph(doc, token, yPosition, margin, maxWidth);
           break;
         case 'code':
-          yPosition = this.renderEnhancedCodeBlock(doc, token, yPosition, margin, maxWidth);
+          yPosition = this.renderEnhancedCodeBlock(doc, token, yPosition, margin, maxWidth, pageHeight);
           break;
         case 'list':
           yPosition = this.renderEnhancedList(doc, token, yPosition, margin, maxWidth);
@@ -394,51 +394,77 @@ class EnhancedPDFService {
     return yPosition + lines.length * 6 + 10;
   }
 
-  renderEnhancedCodeBlock(doc, token, yPosition, margin, maxWidth) {
-    // Enhanced code block background with gradient effect
-    const codeLines = token.text.split('\n').filter(line => line.trim());
-    const lineHeight = 5.5;
-    const padding = 8;
-    const blockHeight = (codeLines.length * lineHeight) + (padding * 2);
-    
-    // Multi-layer background for depth
-    doc.setFillColor(17, 24, 39); // Dark background
-    doc.roundedRect(margin - 4, yPosition - padding, maxWidth + 8, blockHeight, 4, 4, 'F');
-    
-    doc.setFillColor(31, 41, 55); // Slightly lighter overlay
-    doc.roundedRect(margin - 2, yPosition - padding + 2, maxWidth + 4, blockHeight - 4, 3, 3, 'F');
-    
-    // Code line numbers background
-    doc.setFillColor(55, 65, 81);
-    doc.roundedRect(margin, yPosition - padding + 4, 15, blockHeight - 8, 2, 2, 'F');
-    
-    // Render syntax-highlighted code
-    doc.setFontSize(9);
+  renderEnhancedCodeBlock(doc, token, yPosition, margin, maxWidth, pageHeight) {
+    // Light-theme code block: wrapped lines, line-number gutter, page-break aware.
+    const lineHeight = 4.8;
+    const padding = 6;
+    const gutter = 13;
+    const bottomLimit = (pageHeight || doc.internal.pageSize.height) - 32;
+
     doc.setFont('courier', 'normal');
-    
-    codeLines.forEach((line, lineIndex) => {
-      const currentY = yPosition + (lineIndex * lineHeight);
-      
-      // Line number
-      doc.setTextColor(156, 163, 175); // Gray
-      doc.text((lineIndex + 1).toString().padStart(2), margin + 2, currentY);
-      
-      // Highlight the code line
-      const highlightedTokens = this.highlightCode(line);
-      let xOffset = margin + 18;
-      
-      highlightedTokens.forEach(({ text, type }) => {
-        const color = this.syntaxColors[type] || this.syntaxColors['default'];
-        doc.setTextColor(...color);
-        
-        if (text) {
-          doc.text(text, xOffset, currentY);
-          xOffset += doc.getTextWidth(text);
-        }
+    doc.setFontSize(8.5);
+
+    const contentWidth = maxWidth - gutter - 10;
+    const displayLines = [];
+    const rawLines = token.text.replace(/\t/g, '  ').split('\n');
+    // Trim trailing empty lines but keep interior ones for structure
+    while (rawLines.length && rawLines[rawLines.length - 1].trim() === '') rawLines.pop();
+
+    rawLines.forEach((line, i) => {
+      const isComment = /^\s*(#|\/\/)/.test(line);
+      if (line.trim() === '') {
+        displayLines.push({ num: i + 1, text: '', isComment: false });
+        return;
+      }
+      const parts = doc.splitTextToSize(line, contentWidth);
+      parts.forEach((p, j) => {
+        displayLines.push({ num: j === 0 ? i + 1 : null, text: p, isComment });
       });
     });
-    
-    return yPosition + blockHeight + 12;
+
+    if (displayLines.length === 0) return yPosition;
+
+    let idx = 0;
+    while (idx < displayLines.length) {
+      if (yPosition + lineHeight + padding * 2 > bottomLimit) {
+        doc.addPage();
+        yPosition = 20;
+      }
+      const available = Math.max(1, Math.floor((bottomLimit - yPosition - padding * 2) / lineHeight));
+      const chunk = displayLines.slice(idx, idx + available);
+      const blockHeight = chunk.length * lineHeight + padding * 2;
+
+      // Card: light background with a subtle border
+      doc.setFillColor(248, 250, 252);   // slate-50
+      doc.setDrawColor(226, 232, 240);   // slate-200
+      doc.setLineWidth(0.3);
+      doc.roundedRect(margin - 2, yPosition, maxWidth + 4, blockHeight, 2.5, 2.5, 'FD');
+
+      // Line-number gutter
+      doc.setFillColor(241, 245, 249);   // slate-100
+      doc.roundedRect(margin, yPosition + 2, gutter - 2, blockHeight - 4, 2, 2, 'F');
+
+      chunk.forEach((dl, k) => {
+        const y = yPosition + padding + (k + 0.5) * lineHeight;
+        if (dl.num !== null) {
+          doc.setTextColor(148, 163, 184); // slate-400
+          doc.text(String(dl.num).padStart(2), margin + 2, y);
+        }
+        if (dl.text) {
+          if (dl.isComment) {
+            doc.setTextColor(100, 116, 139); // slate-500 for comments
+          } else {
+            doc.setTextColor(30, 41, 59);    // slate-800 for code
+          }
+          doc.text(dl.text, margin + gutter + 3, y);
+        }
+      });
+
+      yPosition += blockHeight + 4;
+      idx += chunk.length;
+    }
+
+    return yPosition + 6;
   }
 
   renderEnhancedList(doc, token, yPosition, margin, maxWidth) {
