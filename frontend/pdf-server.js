@@ -3,7 +3,7 @@ const cors = require('cors');
 const EnhancedPDFService = require('./lib/enhanced-pdf-service');
 
 const app = express();
-const port = process.env.PDF_PORT || 3001;
+const port = process.env.PORT || process.env.PDF_PORT || 3001;
 
 // Enable CORS and JSON parsing
 app.use(cors());

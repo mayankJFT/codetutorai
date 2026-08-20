@@ -1,0 +1,70 @@
+# Render Blueprint: deploy with "New +" -> "Blueprint" and this repo.
+# After the first deploy, set GROQ_API_KEY on the backend service.
+services:
+  # FastAPI backend
+  - type: web
+    name: codetutorai-api
+    runtime: python
+    plan: starter            # needed for the persistent disk; free tier loses SQLite data on restart
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn backend:app --host 0.0.0.0 --port $PORT --workers ${WEB_CONCURRENCY:-1}
+    healthCheckPath: /
+    disk:
+      name: data
+      mountPath: /data
+      sizeGB: 1
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.12.3"
+      - key: GROQ_API_KEY
+        sync: false          # set in dashboard, never committed
+      - key: GROQ_MODEL
+        value: openai/gpt-oss-120b
+      - key: GROQ_MAX_TOKENS
+        value: "2500"
+      - key: PREVIOUS_CHAPTERS_MAX_CHARS
+        value: "4000"
+      - key: SECRET_KEY
+        generateValue: true
+      - key: SQLITE_PATH
+        value: /data/codetutorai.db
+      - key: LLM_CACHE_PATH
+        value: /data/llm_cache.db
+      - key: LOG_DIR
+        value: /data/logs
+      - key: WEB_CONCURRENCY
+        value: "1"
+      - key: GENERATION_WORKERS
+        value: "2"
+      - key: FRONTEND_ORIGIN
+        sync: false          # https://<codetutorai-web>.onrender.com
+      - key: PDF_SERVICE_URL
+        sync: false          # https://<codetutorai-pdf>.onrender.com/generate-pdf (or leave blank for built-in ReportLab PDFs)
+      - key: GITHUB_TOKEN
+        sync: false
+
+  # Next.js frontend
+  - type: web
+    name: codetutorai-web
+    runtime: node
+    plan: free
+    rootDir: frontend
+    buildCommand: npm ci && npm run build
+    startCommand: npm start -- -p $PORT
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+      - key: NEXT_PUBLIC_API_URL
+        sync: false          # https://<codetutorai-api>.onrender.com
+
+  # Node PDF service (optional but gives the nicer PDFs)
+  - type: web
+    name: codetutorai-pdf
+    runtime: node
+    plan: free
+    rootDir: frontend
+    buildCommand: npm ci
+    startCommand: node pdf-server.js
+    envVars:
+      - key: NODE_VERSION
+        value: "22"

@@ -44,9 +44,14 @@ from flow import create_tutorial_flow
 app = FastAPI(title="CodeTutor AI API", version="2.0.0")
 
 # Configure CORS
+# Allowed browser origins; add the deployed frontend via FRONTEND_ORIGIN
+_cors_origins = ["http://localhost:3000", "http://localhost:3001"]
+if os.getenv("FRONTEND_ORIGIN"):
+    _cors_origins.extend(o.strip() for o in os.getenv("FRONTEND_ORIGIN").split(",") if o.strip())
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://localhost:3001"],
+    allow_origins=_cors_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -1829,8 +1834,9 @@ def export_project_tutorial(project_id: str, format: str = "markdown", current_u
 
 if __name__ == "__main__":
     import uvicorn
+    port = int(os.getenv("PORT", "8000"))
     web_workers = int(os.getenv("WEB_CONCURRENCY", "2"))
     if web_workers > 1:
-        uvicorn.run("backend:app", host="0.0.0.0", port=8000, workers=web_workers)
+        uvicorn.run("backend:app", host="0.0.0.0", port=port, workers=web_workers)
     else:
-        uvicorn.run(app, host="0.0.0.0", port=8000)
+        uvicorn.run(app, host="0.0.0.0", port=port)
