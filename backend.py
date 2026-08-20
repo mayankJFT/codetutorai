@@ -74,13 +74,16 @@ if MONGODB_URL:
     _mongo_client = MongoClient(MONGODB_URL, serverSelectionTimeoutMS=15000, tz_aware=True)
     _mongo_client.admin.command("ping")
     db = _mongo_client[DATABASE_NAME]
+    STORAGE_BACKEND = "mongodb"
     print(f"✅ Using MongoDB database '{DATABASE_NAME}'")
 else:
     db = SQLiteStore(SQLITE_PATH)
+    STORAGE_BACKEND = "sqlite"
     print(f"✅ Using SQLite database at {SQLITE_PATH}")
     if os.getenv("RENDER"):
         print("⚠️  WARNING: running on Render without MONGODB_URL - SQLite is EPHEMERAL here; "
-              "all users and tutorials are wiped on every deploy/restart. Set MONGODB_URL.")
+              "all users, tutorials, and the LLM response cache are wiped on every "
+              "deploy/restart. Set MONGODB_URL.")
 
 users_collection = db["users"]
 projects_collection = db["projects"]
@@ -1057,7 +1060,7 @@ def root():
     return {
         "message": "CodeTutor AI - Advanced Code Learning Platform",
         "version": "2.0.0",
-        "storage": "mongodb" if MONGODB_URL else "sqlite (ephemeral on Render!)",
+        "storage": STORAGE_BACKEND,
         "features": ["Authentication", "GitHub Search", "PDF Generation"],
     }
 
