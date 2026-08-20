@@ -50,7 +50,11 @@ def call_llm(prompt: str, use_cache: bool = True, max_tokens: int = None) -> str
     logger.info(f"PROMPT: {prompt}")
 
     if use_cache:
-        cached = _cache.get(prompt)
+        try:
+            cached = _cache.get(prompt)
+        except Exception as e:  # cache read must never break generation
+            logger.warning(f"Cache read failed, proceeding without cache: {e}")
+            cached = None
         if cached is not None:
             logger.info(f"RESPONSE (cache): {cached}")
             return cached

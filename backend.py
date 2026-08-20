@@ -11,6 +11,7 @@ from fastapi.responses import FileResponse, Response, StreamingResponse
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from pydantic import BaseModel, EmailStr
 from typing import Optional, List, Dict, Any
+import json
 import uuid
 import os
 import re
