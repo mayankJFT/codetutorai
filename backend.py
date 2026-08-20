@@ -64,7 +64,8 @@ if not SECRET_KEY:
     import secrets as _secrets
     SECRET_KEY = _secrets.token_hex(32)
     print("⚠️  SECRET_KEY not set - generated a random one for this run. "
-          "Sessions will not survive restarts; set SECRET_KEY in the environment.")
+          "Sessions will not survive restarts, and with WEB_CONCURRENCY > 1 each "
+          "worker gets a DIFFERENT key (random login failures). Set SECRET_KEY.")
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "1440"))  # default 24h, matches frontend cookie lifetime
 

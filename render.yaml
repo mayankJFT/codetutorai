@@ -1,5 +1,5 @@
 # Render Blueprint: deploy with "New +" -> "Blueprint" and this repo.
-# After the first deploy, set GROQ_API_KEY on the backend service.
+# After the first deploy, set OPENROUTER_API_KEY on the backend service.
 services:
   # FastAPI backend
   - type: web
@@ -12,12 +12,12 @@ services:
     envVars:
       - key: PYTHON_VERSION
         value: "3.12.3"
-      - key: GROQ_API_KEY
+      - key: OPENROUTER_API_KEY
         sync: false          # set in dashboard, never committed
-      - key: GROQ_MODEL
-        value: openai/gpt-oss-120b
-      - key: GROQ_MAX_TOKENS
-        value: "2500"
+      - key: OPENROUTER_MODEL
+        value: nvidia/nemotron-3.5-lightning:free
+      - key: LLM_MAX_TOKENS
+        value: "4000"
       - key: PREVIOUS_CHAPTERS_MAX_CHARS
         value: "4000"
       - key: SECRET_KEY
@@ -29,9 +29,9 @@ services:
       - key: WEB_CONCURRENCY
         value: "1"
       - key: GENERATION_WORKERS
-        value: "1"           # one job at a time: concurrent jobs starve each other on Groq's free-tier TPM
-      - key: GROQ_FALLBACK_MODEL
-        value: openai/gpt-oss-20b,qwen/qwen3.6-27b
+        value: "1"           # one job at a time: concurrent jobs share the provider rate-limit budget
+      - key: OPENROUTER_FALLBACK_MODEL
+        value: ""
       - key: FRONTEND_ORIGIN
         sync: false          # https://<codetutorai-web>.onrender.com
       - key: PDF_SERVICE_URL

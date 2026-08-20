@@ -76,7 +76,7 @@ pip install -r requirements.txt
 
 # Configure environment variables
 cp .env.example .env
-# Add your Groq API key (SQLite DB is created automatically)
+# Add your OpenRouter API key (SQLite DB is created automatically)
 ```
 
 ### 3. Frontend Setup
@@ -107,15 +107,15 @@ node pdf-server.js
 ### Environment Variables
 ```bash
 # .env file
-GROQ_API_KEY=your_groq_api_key
+OPENROUTER_API_KEY=your_openrouter_api_key
 # Optional: GitHub token for repo fetching (avoids the 60 req/hr anonymous limit)
 GITHUB_TOKEN=ghp_...
 # Concurrency (defaults shown): uvicorn worker processes / parallel generation jobs
 WEB_CONCURRENCY=2
 GENERATION_WORKERS=2
-# Model + budgets. Groq free tier allows 8000 tokens/min (input+output), so keep these small:
-GROQ_MODEL=openai/gpt-oss-120b
-GROQ_MAX_TOKENS=2500
+# Model + budgets. Free OpenRouter models are rate-limited, so keep these modest:
+OPENROUTER_MODEL=nvidia/nemotron-3.5-lightning:free
+LLM_MAX_TOKENS=2500
 PREVIOUS_CHAPTERS_MAX_CHARS=4000
 SECRET_KEY=your_jwt_secret
 # Optional: Node PDF service URL (default http://localhost:3001/generate-pdf)

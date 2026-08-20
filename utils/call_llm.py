@@ -5,6 +5,8 @@ import threading
 import time
 from datetime import datetime
 
+import requests
+
 from utils.llm_cache import create_llm_cache
 
 # Configure logging
@@ -27,17 +29,36 @@ if not logger.handlers:
 
 _cache = create_llm_cache()
 
-# Only one Groq request in flight per process: concurrent jobs share one
-# tokens-per-minute budget, so serializing calls prevents 429/413 storms
+# Only one LLM request in flight per process: concurrent jobs share one
+# provider rate-limit budget, so serializing calls prevents 429 storms
 # where parallel jobs fail each other.
-_groq_gate = threading.Lock()
+_llm_gate = threading.Lock()
 
-# Groq formats retry hints as "7.66s", "1m2.638s", or "2m3s".
+OPENROUTER_URL = os.getenv(
+    "OPENROUTER_BASE_URL", "https://openrouter.ai/api/v1/chat/completions"
+)
+
+# Providers format retry hints as "7.66s", "1m2.638s", or "2m3s".
 _RETRY_AFTER_RE = re.compile(r"try again in (?:(\d+)m)?([0-9.]+)s", re.IGNORECASE)
 
 
-def _retry_delay(error_text: str, attempt: int) -> float:
-    match = _RETRY_AFTER_RE.search(error_text)
+def _env_int(name, fallback_name, default):
+    """Read an int env var, honoring a legacy fallback name for compatibility."""
+    raw = os.getenv(name) or os.getenv(fallback_name)
+    try:
+        return int(raw) if raw is not None else default
+    except (TypeError, ValueError):
+        return default
+
+
+def _retry_delay(error_text: str, attempt: int, retry_after=None) -> float:
+    # Prefer the server's explicit Retry-After header (seconds) when present.
+    if retry_after is not None:
+        try:
+            return min(float(retry_after) + 1.0, 180.0)
+        except (TypeError, ValueError):
+            pass
+    match = _RETRY_AFTER_RE.search(error_text or "")
     if match:
         minutes = int(match.group(1) or 0)
         seconds = float(match.group(2))
@@ -51,7 +72,7 @@ def call_llm(prompt: str, use_cache: bool = True, max_tokens: int = None) -> str
 
     # Cache is keyed by requested model + prompt so a model switch never
     # serves stale answers from a different model.
-    requested_model = os.getenv("GROQ_MODEL", "meta-llama/llama-4-scout-17b-16e-instruct")
+    requested_model = os.getenv("OPENROUTER_MODEL", "nvidia/nemotron-3.5-lightning:free")
     cache_key = f"[{requested_model}] {prompt}"
 
     if use_cache:
@@ -64,72 +85,145 @@ def call_llm(prompt: str, use_cache: bool = True, max_tokens: int = None) -> str
             logger.info(f"RESPONSE (cache): {cached}")
             return cached
 
-    try:
-        from groq import Groq
-    except ImportError:
-        logger.error("Groq library not installed. Install with: pip install groq")
-        raise Exception("Groq library not available")
+    api_key = os.getenv("OPENROUTER_API_KEY")
+    if not api_key:
+        logger.error("OPENROUTER_API_KEY is not set")
+        raise Exception("OPENROUTER_API_KEY is not set")
 
-    client = Groq(api_key=os.getenv("GROQ_API_KEY"))
-    max_retries = int(os.getenv("GROQ_RATE_RETRIES", "4"))
+    max_retries = _env_int("LLM_RATE_RETRIES", "GROQ_RATE_RETRIES", 4)
     model = requested_model
-    # The free tier's daily token budget is per model, so sibling models are
-    # instant relief when the primary's daily quota runs dry. Comma-separated chain.
-    _fallbacks = [m.strip() for m in os.getenv("GROQ_FALLBACK_MODEL", "openai/gpt-oss-20b,qwen/qwen3.6-27b").split(",") if m.strip()]
+    # Optional comma-separated fallback chain; a fresh model usually has its
+    # own separate rate-limit budget, so it's instant relief on a 429.
+    _fallbacks = [
+        m.strip()
+        for m in os.getenv("OPENROUTER_FALLBACK_MODEL", "").split(",")
+        if m.strip()
+    ]
     fallback_chain = [m for m in _fallbacks if m != model]
+
+    headers = {
+        "Authorization": f"Bearer {api_key}",
+        "Content-Type": "application/json",
+    }
+    # Optional OpenRouter attribution headers (used for their rankings only).
+    referer = os.getenv("OPENROUTER_REFERER")
+    if referer:
+        headers["HTTP-Referer"] = referer
+    headers["X-Title"] = os.getenv("OPENROUTER_TITLE", "CodeTutorAI")
+
+    timeout = float(os.getenv("LLM_TIMEOUT", "120"))
+    default_max_tokens = _env_int("LLM_MAX_TOKENS", "GROQ_MAX_TOKENS", 4000)
     response_text = None
     last_error = None
 
+    # Reasoning control: "off" (default) disables hidden chain-of-thought so
+    # the whole token budget goes to the answer; "low" caps it; "on" leaves
+    # the provider default. Models that reject the parameter get a retry
+    # without it (see below).
+    reasoning_mode = os.getenv("LLM_REASONING", "off").lower()
+    send_reasoning = reasoning_mode in ("off", "low")
+
     for attempt in range(max_retries + 1):
+        payload = {
+            "model": model,
+            "messages": [{"role": "user", "content": prompt}],
+            "temperature": 0.7,
+            "max_tokens": max_tokens or default_max_tokens,
+            "top_p": 1,
+        }
+        if send_reasoning:
+            payload["reasoning"] = {"enabled": False} if reasoning_mode == "off" else {"effort": "low"}
         try:
-            kwargs = dict(
-                model=model,
-                messages=[{"role": "user", "content": prompt}],
-                temperature=0.7,
-                max_completion_tokens=max_tokens or int(os.getenv("GROQ_MAX_TOKENS", "4000")),
-                top_p=1,
-            )
-            # gpt-oss are reasoning models: cap hidden reasoning so small
-            # completion budgets yield actual text (and burn fewer tokens).
-            if "gpt-oss" in model:
-                kwargs["reasoning_effort"] = os.getenv("GROQ_REASONING_EFFORT", "low")
-            with _groq_gate:
-                completion = client.chat.completions.create(**kwargs)
-            response_text = completion.choices[0].message.content
-            if not (response_text or "").strip():
-                raise RuntimeError("empty completion (reasoning consumed the token budget)")
-            break
-        except Exception as e:  # noqa: BLE001 - normalize provider errors below
+            with _llm_gate:
+                resp = requests.post(
+                    OPENROUTER_URL, headers=headers, json=payload, timeout=timeout
+                )
+        except requests.RequestException as e:
             last_error = e
-            status = getattr(e, "status_code", None)
-            message = str(e)
-            if status == 413 or "reduce your message size" in message:
-                logger.error(f"Groq request too large: {e}")
-                raise Exception(
-                    "The prompt exceeds Groq's per-request token limit. This usually means the "
-                    "repository is large - lower PROMPT_CONTEXT_MAX_CHARS, tighten the include "
-                    f"patterns, or upgrade the Groq tier. Provider message: {e}"
-                )
-            if status == 429 and attempt < max_retries:
-                daily_exhausted = "per day" in message or "TPD" in message
-                if daily_exhausted and fallback_chain:
-                    next_model = fallback_chain.pop(0)
-                    logger.warning(f"Daily token budget for {model} exhausted; switching to {next_model}")
-                    model = next_model
-                    continue
-                delay = _retry_delay(message, attempt)
-                logger.warning(f"Groq rate limited (attempt {attempt + 1}); sleeping {delay:.1f}s")
-                time.sleep(delay)
+            if attempt < max_retries:
+                logger.warning(f"Network error (attempt {attempt + 1}): {e}")
+                time.sleep(_retry_delay(str(e), attempt))
                 continue
-            if status == 429 and ("per day" in message or "TPD" in message):
-                logger.error(f"Groq daily budget exhausted: {e}")
-                raise Exception(
-                    "Groq free-tier daily token budget is exhausted for today's models. "
-                    "It refills gradually - try again later, or upgrade the Groq tier. "
-                    f"Provider message: {e}"
-                )
-            logger.error(f"Groq API call failed: {e}")
+            logger.error(f"LLM API call failed: {e}")
             raise Exception(f"API call failed: {e}")
+
+        try:
+            data = resp.json()
+        except ValueError:
+            data = {}
+        err = data.get("error") if isinstance(data, dict) else None
+        # OpenRouter can return an error object (with the real HTTP-ish code)
+        # even under a 200, so let the error's own code win when present.
+        status = resp.status_code
+        if isinstance(err, dict) and err.get("code") is not None:
+            try:
+                status = int(err["code"])
+            except (TypeError, ValueError):
+                pass
+
+        if status == 400 and send_reasoning and "reasoning" in str(err).lower():
+            logger.warning(f"Model {model} rejected the reasoning parameter; retrying without it")
+            send_reasoning = False
+            continue
+
+        # Success path.
+        if resp.status_code == 200 and not err and data.get("choices"):
+            response_text = (data["choices"][0].get("message", {}).get("content") or "")
+            if response_text.strip():
+                break
+            # Empty completion (e.g. the model burned the budget on nothing).
+            last_error = RuntimeError("empty completion")
+            if attempt < max_retries:
+                logger.warning(f"Empty completion (attempt {attempt + 1}); retrying")
+                time.sleep(min(5.0 * (attempt + 1), 30.0))
+                continue
+            raise Exception("API call failed: empty completion")
+
+        # Error path.
+        message = ""
+        if isinstance(err, dict):
+            message = err.get("message") or ""
+        message = message or resp.text or f"HTTP {resp.status_code}"
+        last_error = Exception(message)
+        lower = message.lower()
+
+        too_large = status in (400, 413) and any(
+            t in lower
+            for t in ("token", "context", "too large", "maximum", "length", "reduce your message")
+        )
+        if too_large:
+            logger.error(f"LLM request too large: {message}")
+            raise Exception(
+                "The prompt exceeds the model's per-request token limit. This usually means "
+                "the repository is large - lower PROMPT_CONTEXT_MAX_CHARS, tighten the include "
+                f"patterns, or use a model with a larger context. Provider message: {message}"
+            )
+        if status == 402:
+            logger.error(f"OpenRouter credits exhausted: {message}")
+            raise Exception(
+                "OpenRouter reports insufficient credits or a free-tier limit was reached. "
+                "Add credits, wait for the free-tier window to reset, or switch models. "
+                f"Provider message: {message}"
+            )
+        if status == 429 and attempt < max_retries:
+            if fallback_chain:
+                next_model = fallback_chain.pop(0)
+                logger.warning(f"{model} rate limited; switching to {next_model}")
+                model = next_model
+                continue
+            delay = _retry_delay(message, attempt, resp.headers.get("Retry-After"))
+            logger.warning(f"Rate limited (attempt {attempt + 1}); sleeping {delay:.1f}s")
+            time.sleep(delay)
+            continue
+        if status == 429:
+            logger.error(f"Rate limit / budget exhausted: {message}")
+            raise Exception(
+                "The model's rate limit or daily budget is exhausted. It resets over time - "
+                "try again later, add an OPENROUTER_FALLBACK_MODEL, or upgrade the tier. "
+                f"Provider message: {message}"
+            )
+        logger.error(f"LLM API call failed: {message}")
+        raise Exception(f"API call failed: {message}")
 
     if response_text is None:
         raise Exception(f"API call failed: {last_error}")

@@ -1,35 +1,29 @@
-"""Unit tests for call_llm retry/fallback logic with a stubbed Groq client."""
-import types
-
+"""Unit tests for call_llm retry/fallback logic with a stubbed OpenRouter HTTP layer."""
 import pytest
 
 import utils.call_llm as cl
 
 
-class FakeRateLimit(Exception):
-    def __init__(self, message, status_code=429):
-        super().__init__(message)
+class FakeResp:
+    def __init__(self, status_code=200, json_data=None, text="", headers=None):
         self.status_code = status_code
+        self._json = json_data
+        self.text = text
+        self.headers = headers or {}
+
+    def json(self):
+        if self._json is None:
+            raise ValueError("no json")
+        return self._json
 
 
-class StubCompletion:
-    def __init__(self, text):
-        self.choices = [types.SimpleNamespace(message=types.SimpleNamespace(content=text))]
+def ok(text):
+    return FakeResp(200, {"choices": [{"message": {"content": text}}]})
 
 
-def make_client(script):
-    """script: list of callables invoked per attempt; return text or raise."""
-    calls = []
-
-    class Completions:
-        def create(self, **kwargs):
-            step = script[min(len(calls), len(script) - 1)]
-            calls.append(kwargs)
-            result = step(kwargs)
-            return StubCompletion(result)
-
-    client = types.SimpleNamespace(chat=types.SimpleNamespace(completions=Completions()))
-    return client, calls
+def err(status, message):
+    # OpenRouter echoes the effective code inside the error object.
+    return FakeResp(status, {"error": {"message": message, "code": status}})
 
 
 @pytest.fixture
@@ -38,10 +32,16 @@ def no_sleep(monkeypatch):
 
 
 def run(monkeypatch, script, **env):
-    client, calls = make_client(script)
-    monkeypatch.setattr(cl, "Groq", None, raising=False)
-    import groq
-    monkeypatch.setattr(groq, "Groq", lambda api_key=None: client)
+    """script: list of callables invoked per attempt; each returns a FakeResp."""
+    calls = []
+
+    def fake_post(url, headers=None, json=None, timeout=None):
+        step = script[min(len(calls), len(script) - 1)]
+        calls.append(json)  # json is the request payload
+        return step(json)
+
+    monkeypatch.setattr(cl.requests, "post", fake_post)
+    monkeypatch.setenv("OPENROUTER_API_KEY", "test-key")
     for k, v in env.items():
         monkeypatch.setenv(k, v)
     out = cl.call_llm("test prompt", use_cache=False)
@@ -49,57 +49,70 @@ def run(monkeypatch, script, **env):
 
 
 def test_success_first_try(monkeypatch, no_sleep):
-    out, calls = run(monkeypatch, [lambda kw: "hello"], GROQ_MODEL="m1")
+    out, calls = run(monkeypatch, [lambda kw: ok("hello")], OPENROUTER_MODEL="m1")
     assert out == "hello"
     assert calls[0]["model"] == "m1"
 
 
-def test_tpm_429_retries_then_succeeds(monkeypatch, no_sleep):
-    def fail(kw):
-        raise FakeRateLimit("tokens per minute (TPM): try again in 2.5s")
-    out, calls = run(monkeypatch, [fail, lambda kw: "ok"], GROQ_MODEL="m1")
+def test_429_retries_same_model_when_no_fallback(monkeypatch, no_sleep):
+    script = [lambda kw: err(429, "rate limited: try again in 2.5s"), lambda kw: ok("ok")]
+    out, calls = run(monkeypatch, script, OPENROUTER_MODEL="m1")
     assert out == "ok"
     assert len(calls) == 2
-    assert calls[1]["model"] == "m1"  # same model for TPM waits
+    assert calls[1]["model"] == "m1"  # no fallback configured -> back off, same model
 
 
-def test_tpd_429_switches_to_fallback_model(monkeypatch, no_sleep):
-    def fail_daily(kw):
+def test_429_switches_to_fallback_model(monkeypatch, no_sleep):
+    def step(kw):
         if kw["model"] == "m1":
-            raise FakeRateLimit("tokens per day (TPD): Limit 200000")
-        return "from-fallback"
-    out, calls = run(monkeypatch, [fail_daily, fail_daily], GROQ_MODEL="m1", GROQ_FALLBACK_MODEL="m2")
+            return err(429, "rate limit exceeded")
+        return ok("from-fallback")
+    out, calls = run(monkeypatch, [step, step], OPENROUTER_MODEL="m1", OPENROUTER_FALLBACK_MODEL="m2")
     assert out == "from-fallback"
     assert calls[0]["model"] == "m1"
     assert calls[1]["model"] == "m2"
 
 
-def test_tpd_on_all_models_raises_clear_error(monkeypatch, no_sleep):
-    def fail_daily(kw):
-        raise FakeRateLimit("tokens per day (TPD): Limit 200000")
-    with pytest.raises(Exception, match="daily token budget"):
-        run(monkeypatch, [fail_daily] * 8, GROQ_MODEL="m1", GROQ_FALLBACK_MODEL="m2,m3", GROQ_RATE_RETRIES="2")
+def test_429_on_all_models_raises_clear_error(monkeypatch, no_sleep):
+    def step(kw):
+        return err(429, "rate limit exceeded")
+    with pytest.raises(Exception, match="rate limit"):
+        run(monkeypatch, [step] * 8, OPENROUTER_MODEL="m1", OPENROUTER_FALLBACK_MODEL="m2,m3", LLM_RATE_RETRIES="2")
 
 
-def test_tpd_chain_walks_all_fallbacks(monkeypatch, no_sleep):
+def test_chain_walks_all_fallbacks(monkeypatch, no_sleep):
     def step(kw):
         if kw["model"] in ("m1", "m2"):
-            raise FakeRateLimit("tokens per day (TPD): Limit 200000")
-        return "third-model"
-    out, calls = run(monkeypatch, [step] * 4, GROQ_MODEL="m1", GROQ_FALLBACK_MODEL="m2,m3")
+            return err(429, "rate limit exceeded")
+        return ok("third-model")
+    out, calls = run(monkeypatch, [step] * 4, OPENROUTER_MODEL="m1", OPENROUTER_FALLBACK_MODEL="m2,m3")
     assert out == "third-model"
     assert [c["model"] for c in calls] == ["m1", "m2", "m3"]
 
 
 def test_413_fails_fast_with_clear_error(monkeypatch, no_sleep):
     def too_big(kw):
-        raise FakeRateLimit("Request too large... please reduce your message size and try again.", status_code=413)
+        return err(413, "Request too large... please reduce your message size and try again.")
     with pytest.raises(Exception, match="per-request token limit"):
-        run(monkeypatch, [too_big] * 3, GROQ_MODEL="m1")
+        run(monkeypatch, [too_big] * 3, OPENROUTER_MODEL="m1")
 
 
-def test_reasoning_effort_only_for_gpt_oss(monkeypatch, no_sleep):
-    _, calls = run(monkeypatch, [lambda kw: "x"], GROQ_MODEL="openai/gpt-oss-120b")
-    assert calls[0].get("reasoning_effort") == "low"
-    _, calls2 = run(monkeypatch, [lambda kw: "x"], GROQ_MODEL="llama-something")
-    assert "reasoning_effort" not in calls2[0]
+def test_402_credits_exhausted_raises(monkeypatch, no_sleep):
+    def broke(kw):
+        return err(402, "Insufficient credits")
+    with pytest.raises(Exception, match="credits"):
+        run(monkeypatch, [broke] * 3, OPENROUTER_MODEL="m1")
+
+
+def test_empty_completion_retries_then_fails(monkeypatch, no_sleep):
+    def empty(kw):
+        return ok("   ")
+    with pytest.raises(Exception, match="empty completion"):
+        run(monkeypatch, [empty] * 3, OPENROUTER_MODEL="m1", LLM_RATE_RETRIES="1")
+
+
+def test_missing_api_key_raises(monkeypatch, no_sleep):
+    monkeypatch.delenv("OPENROUTER_API_KEY", raising=False)
+    monkeypatch.setattr(cl.requests, "post", lambda *a, **k: ok("x"))
+    with pytest.raises(Exception, match="OPENROUTER_API_KEY"):
+        cl.call_llm("p", use_cache=False)

@@ -337,7 +337,7 @@ Format the output as a YAML list of dictionaries:
     - 5 # path/to/another.js
 # ... up to {max_abstraction_num} abstractions
 ```"""
-        response = call_llm(prompt, use_cache=(use_cache and self.cur_retry == 0), max_tokens=1500)  # abstractions YAML is small
+        response = call_llm(prompt, use_cache=(use_cache and self.cur_retry == 0), max_tokens=2500)  # abstractions YAML
 
         # --- Validation ---
         yaml_str = extract_yaml_block(response)
@@ -513,7 +513,7 @@ relationships:
 
 Now, provide the YAML output:
 """
-        response = call_llm(prompt, use_cache=(use_cache and self.cur_retry == 0), max_tokens=1200) # relationships YAML is small
+        response = call_llm(prompt, use_cache=(use_cache and self.cur_retry == 0), max_tokens=2000) # relationships YAML
 
         # --- Validation ---
         yaml_str = extract_yaml_block(response)
@@ -658,7 +658,7 @@ Output the ordered list of abstraction indices, including the name in a comment 
 
 Now, provide the YAML output:
 """
-        response = call_llm(prompt, use_cache=(use_cache and self.cur_retry == 0), max_tokens=600) # chapter order list is tiny
+        response = call_llm(prompt, use_cache=(use_cache and self.cur_retry == 0), max_tokens=1000) # chapter order list
 
         # --- Validation ---
         yaml_str = extract_yaml_block(response)
@@ -941,7 +941,7 @@ Instructions for the chapter (Generate content in {language.capitalize()} unless
 
 Now, directly provide a super beginner-friendly Markdown output (DON'T need ```markdown``` tags):
 """
-        chapter_content = call_llm(prompt, use_cache=(use_cache and self.cur_retry == 0), max_tokens=int(os.getenv("GROQ_MAX_TOKENS", "2500"))) # chapters need the full budget
+        chapter_content = call_llm(prompt, use_cache=(use_cache and self.cur_retry == 0), max_tokens=int(os.getenv("LLM_MAX_TOKENS", os.getenv("GROQ_MAX_TOKENS", "2500")))) # chapters need the full budget
         # Basic validation/cleanup
         actual_heading = f"# Chapter {chapter_num}: {abstraction_name}"  # Use potentially translated name
         if not chapter_content.strip().startswith(f"# Chapter {chapter_num}"):
