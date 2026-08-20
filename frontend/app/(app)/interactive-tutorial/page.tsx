@@ -2,10 +2,17 @@
 
 import React, { useState } from 'react';
 import { Book, Code, Play } from 'lucide-react';
-import CodePlayground from '../../components/interactive/CodePlayground';
-import InteractiveExample from '../../components/interactive/InteractiveExample';
-import QuizQuestion from '../../components/interactive/QuizQuestion';
-import ProgressTracker from '../../components/interactive/ProgressTracker';
+import CodePlaygroundJs from '@/components/interactive/CodePlayground';
+import InteractiveExampleJs from '@/components/interactive/InteractiveExample';
+import QuizQuestionJs from '@/components/interactive/QuizQuestion';
+import ProgressTrackerJs from '@/components/interactive/ProgressTracker';
+import { PageHeader } from '@/components/ui/page-header';
+
+// The interactive widgets are legacy .jsx components without prop types.
+const CodePlayground = CodePlaygroundJs as unknown as React.ComponentType<any>;
+const InteractiveExample = InteractiveExampleJs as unknown as React.ComponentType<any>;
+const QuizQuestion = QuizQuestionJs as unknown as React.ComponentType<any>;
+const ProgressTracker = ProgressTrackerJs as unknown as React.ComponentType<any>;
 
 export default function InteractiveTutorialPage() {
   const [currentChapter, setCurrentChapter] = useState(0);
@@ -93,18 +100,13 @@ console.log(calculate(3, 4));`,
   ];
 
   return (
-    <div className="">
-      {/* Header */}
-      <div className="bg-white shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex items-center space-x-3">
-            <Book className="text-blue-600" size={28} />
-            <h1 className="text-2xl font-bold text-gray-900">Interactive Tutorial</h1>
-          </div>
-        </div>
-      </div>
+    <div>
+      <PageHeader
+        title="Interactive tutorial"
+        description="Learn by doing — code examples, exercises and instant feedback."
+      />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div>
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
           {/* Sidebar - Progress Tracker */}
           <div className="lg:col-span-1">
@@ -119,7 +121,7 @@ console.log(calculate(3, 4));`,
           {/* Main Content */}
           <div className="lg:col-span-3 space-y-8">
             {/* Welcome Section */}
-            <div className="bg-gradient-to-r from-blue-500 to-indigo-600 rounded-lg p-8 text-white">
+            <div className="bg-gradient-to-br from-indigo-600 to-violet-600 rounded-xl p-8 text-white shadow-lift">
               <div className="flex items-center space-x-3 mb-4">
                 <Play className="text-white" size={32} />
                 <h2 className="text-3xl font-bold">Interactive Learning Experience</h2>
@@ -144,12 +146,12 @@ console.log(calculate(3, 4));`,
             </div>
 
             {/* Interactive Code Playground */}
-            <div className="bg-white rounded-lg shadow-sm p-6">
+            <div className="bg-card border border-border rounded-xl shadow-soft p-6">
               <div className="flex items-center space-x-3 mb-6">
                 <Code className="text-green-600" size={24} />
-                <h3 className="text-xl font-semibold text-gray-900">Code Playground</h3>
+                <h3 className="text-xl font-semibold text-foreground">Code Playground</h3>
               </div>
-              <p className="text-gray-600 mb-6">
+              <p className="text-muted-foreground mb-6">
                 Try out JavaScript code in real-time. Experiment with functions, variables, and see immediate results.
               </p>
               <CodePlayground
@@ -191,7 +193,7 @@ for (let i = 0; i < 8; i++) {
                 <div className="bg-purple-100 p-2 rounded-lg">
                   <Book className="text-purple-600" size={20} />
                 </div>
-                <h3 className="text-xl font-semibold text-gray-900">Knowledge Check</h3>
+                <h3 className="text-xl font-semibold text-foreground">Knowledge Check</h3>
               </div>
               
               {sampleQuizQuestions.map((quiz, index) => (
