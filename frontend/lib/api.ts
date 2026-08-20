@@ -337,6 +337,11 @@ class GitHubAPI {
   }
 }
 
+export function getStreamUrl(jobId: string): string {
+  const token = Cookies.get('access_token') ?? ''
+  return `${API_BASE}/status/${jobId}/stream?token=${encodeURIComponent(token)}`
+}
+
 export const authAPI = new AuthAPI()
 export const githubAPI = new GitHubAPI()
 export const tutorialAPI = new TutorialAPI()
