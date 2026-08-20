@@ -16,7 +16,7 @@ const DEFAULTS: ProjectConfig = {
   local_dir: undefined,
   project_name: '',
   github_token: '',
-  include_patterns: ['*.py', '*.js', '*.ts', '*.tsx', '*.go', '*.java', '*.rs', '*.md'],
+  include_patterns: ['*.py', '*.js', '*.ts', '*.tsx', '*.go', '*.java', '*.rs'],
   exclude_patterns: ['tests/*', 'test/*', 'docs/*', 'node_modules/*', 'dist/*', 'build/*', '*.test.*', '*.min.*'],
   max_file_size: 100000,
   language: 'english',
