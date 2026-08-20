@@ -60,3 +60,31 @@ class LLMCache:
                 "ON CONFLICT(prompt) DO UPDATE SET response = excluded.response",
                 (prompt, response),
             )
+
+
+class MongoLLMCache:
+    """Same get/set contract as LLMCache, backed by a MongoDB collection."""
+
+    def __init__(self, mongo_url: str, database: str = "codetutorai"):
+        from pymongo import MongoClient
+
+        self._col = MongoClient(mongo_url, serverSelectionTimeoutMS=15000)[database]["llm_cache"]
+
+    def get(self, prompt: str):
+        doc = self._col.find_one({"_id": prompt})
+        return doc["response"] if doc else None
+
+    def set(self, prompt: str, response: str) -> None:
+        self._col.update_one({"_id": prompt}, {"$set": {"response": response}}, upsert=True)
+
+
+def create_llm_cache():
+    """Cache backed by MongoDB when MONGODB_URL is set, else local SQLite."""
+    mongo_url = os.getenv("MONGODB_URL") or os.getenv("MONGODB_URI")
+    if mongo_url:
+        return MongoLLMCache(mongo_url, os.getenv("DATABASE_NAME", "codetutorai"))
+    base = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    return LLMCache(
+        os.getenv("LLM_CACHE_PATH", os.path.join(base, "llm_cache.db")),
+        legacy_json_path=os.path.join(base, "llm_cache.json"),
+    )

@@ -126,9 +126,14 @@ BACKEND_URL=http://localhost:8000
 ```
 
 ### Database
-The backend uses a local SQLite file (`codetutorai.db` by default, override with `SQLITE_PATH`).
-It is created automatically on first start — no external database service is required.
-To reset all data, stop the backend and delete the `.db` file.
+Two storage backends, selected by environment:
+- **MongoDB** — set `MONGODB_URL` (e.g. a free MongoDB Atlas cluster). Use this in production
+  and on ephemeral hosts (Render free tier) so data survives deploys. The LLM cache moves to
+  Mongo too. `DATABASE_NAME` defaults to `codetutorai`.
+- **SQLite (default for local dev)** — with `MONGODB_URL` unset, a local `codetutorai.db` file
+  is used (override path with `SQLITE_PATH`). Created automatically; delete the file to reset.
+
+Migrate existing local data up with `python scripts/migrate_sqlite_to_mongo.py --include-llm-cache`.
 
 ### OpenAI Setup
 1. Sign up at OpenAI Platform

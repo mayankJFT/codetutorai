@@ -5,7 +5,7 @@ import threading
 import time
 from datetime import datetime
 
-from utils.llm_cache import LLMCache
+from utils.llm_cache import create_llm_cache
 
 # Configure logging
 log_directory = os.getenv("LOG_DIR", "logs")
@@ -25,11 +25,7 @@ if not logger.handlers:
     )
     logger.addHandler(file_handler)
 
-_BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-_cache = LLMCache(
-    os.getenv("LLM_CACHE_PATH", os.path.join(_BASE_DIR, "llm_cache.db")),
-    legacy_json_path=os.path.join(_BASE_DIR, "llm_cache.json"),
-)
+_cache = create_llm_cache()
 
 # Only one Groq request in flight per process: concurrent jobs share one
 # tokens-per-minute budget, so serializing calls prevents 429/413 storms

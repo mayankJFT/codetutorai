@@ -36,7 +36,7 @@ import base64
 import html
 
 # Local SQLite document store
-from database import SQLiteStore, Collection
+from database import SQLiteStore
 
 # Import the flow creation function
 from flow import create_tutorial_flow
@@ -62,15 +62,27 @@ SECRET_KEY = os.getenv("SECRET_KEY", "your-secret-key-change-in-production")
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "1440"))  # default 24h, matches frontend cookie lifetime
 
-# SQLite Configuration (local persistence)
+# Storage: MongoDB when MONGODB_URL is set (survives redeploys on
+# ephemeral hosts like Render's free tier); local SQLite otherwise.
+MONGODB_URL = os.getenv("MONGODB_URL") or os.getenv("MONGODB_URI")
+DATABASE_NAME = os.getenv("DATABASE_NAME", "codetutorai")
 SQLITE_PATH = os.getenv("SQLITE_PATH", os.path.join(os.path.dirname(os.path.abspath(__file__)), "codetutorai.db"))
 
-db = SQLiteStore(SQLITE_PATH)
-users_collection: Collection = db["users"]
-projects_collection: Collection = db["projects"]
-jobs_collection: Collection = db["jobs"]
-tutorials_collection: Collection = db["tutorials"]
-print(f"✅ Using SQLite database at {SQLITE_PATH}")
+if MONGODB_URL:
+    from pymongo import MongoClient
+
+    _mongo_client = MongoClient(MONGODB_URL, serverSelectionTimeoutMS=15000, tz_aware=True)
+    _mongo_client.admin.command("ping")
+    db = _mongo_client[DATABASE_NAME]
+    print(f"✅ Using MongoDB database '{DATABASE_NAME}'")
+else:
+    db = SQLiteStore(SQLITE_PATH)
+    print(f"✅ Using SQLite database at {SQLITE_PATH}")
+
+users_collection = db["users"]
+projects_collection = db["projects"]
+jobs_collection = db["jobs"]
+tutorials_collection = db["tutorials"]
 
 # Node.js PDF service (frontend/pdf-server.js); falls back to ReportLab if unreachable
 PDF_SERVICE_URL = os.getenv("PDF_SERVICE_URL", "http://localhost:3001/generate-pdf")

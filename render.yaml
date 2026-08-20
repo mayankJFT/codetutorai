@@ -5,7 +5,7 @@ services:
   - type: web
     name: codetutorai-api
     runtime: python
-    plan: free               # NOTE: no persistent disk on free — SQLite data is wiped on every deploy/restart
+    plan: free               # data lives in MongoDB Atlas (MONGODB_URL), so deploys/restarts don't lose it
     buildCommand: pip install -r requirements.txt
     startCommand: uvicorn backend:app --host 0.0.0.0 --port $PORT --workers ${WEB_CONCURRENCY:-1}
     healthCheckPath: /
@@ -22,11 +22,8 @@ services:
         value: "4000"
       - key: SECRET_KEY
         generateValue: true
-      # Ephemeral storage on free tier (upgrade to starter + a /data disk to persist)
-      - key: SQLITE_PATH
-        value: ./codetutorai.db
-      - key: LLM_CACHE_PATH
-        value: ./llm_cache.db
+      - key: MONGODB_URL
+        sync: false          # MongoDB Atlas connection string; data survives deploys
       - key: LOG_DIR
         value: ./logs
       - key: WEB_CONCURRENCY
