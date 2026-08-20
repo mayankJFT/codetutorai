@@ -1122,7 +1122,7 @@ def search_github_repos(search: GitHubRepoSearch, _current_user: Dict[str, Any] 
             params["q"] += f" language:{search.language}"
         
         headers = {"Accept": "application/vnd.github.v3+json"}
-        github_token = os.getenv("GITHUB_TOKEN")
+        github_token = (_current_user.get("settings") or {}).get("github_token") or os.getenv("GITHUB_TOKEN")
         if github_token:
             headers["Authorization"] = f"token {github_token}"
         
@@ -1163,6 +1163,11 @@ def generate_tutorial(config: ProjectConfig, current_user: Dict[str, Any] = Depe
     job_id = str(uuid.uuid4())
     
     # Initialize job tracking
+    if not config.github_token:
+        saved_token = (current_user.get("settings") or {}).get("github_token")
+        if saved_token:
+            config.github_token = saved_token
+
     job_doc = {
         "_id": job_id,
         "user_id": current_user["_id"],
@@ -1477,7 +1482,7 @@ def get_settings(current_user: Dict[str, Any] = Depends(get_current_user)):
             "auto_save": user_settings.get("auto_save", True),
             "theme": user_settings.get("theme", "system"),
             "notifications": user_settings.get("notifications", True),
-            "github_token_configured": bool(os.getenv("GITHUB_TOKEN")),
+            "github_token_configured": bool(user_settings.get("github_token") or os.getenv("GITHUB_TOKEN")),
             "user": {
                 "id": current_user["_id"],
                 "email": current_user["email"],
@@ -1513,30 +1518,22 @@ def update_settings(settings: Dict[str, Any], current_user: Dict[str, Any] = Dep
         raise HTTPException(status_code=500, detail="Database not available")
     
     try:
-        # Update user settings in the database
-        users_collection = db.users
-        update_data = {}
-        
-        # Allow updating specific settings
-        if "default_language" in settings:
-            update_data["settings.default_language"] = settings["default_language"]
-        if "max_file_size" in settings:
-            update_data["settings.max_file_size"] = settings["max_file_size"]
-        if "cache_enabled" in settings:
-            update_data["settings.cache_enabled"] = settings["cache_enabled"]
-        if "max_abstractions" in settings:
-            update_data["settings.max_abstractions"] = settings["max_abstractions"]
-        if "auto_save" in settings:
-            update_data["settings.auto_save"] = settings["auto_save"]
-        if "theme" in settings:
-            update_data["settings.theme"] = settings["theme"]
-        if "notifications" in settings:
-            update_data["settings.notifications"] = settings["notifications"]
-        
-        if update_data:
+        # Merge the allowed fields into the user's nested settings dict.
+        allowed = {"default_language", "max_file_size", "cache_enabled", "max_abstractions",
+                   "auto_save", "theme", "notifications", "github_token"}
+        incoming = {k: v for k, v in settings.items() if k in allowed}
+        # An empty github_token means "keep the existing one"
+        if incoming.get("github_token") == "":
+            incoming.pop("github_token")
+
+        if incoming:
+            users_collection = db.users
+            user_doc = users_collection.find_one({"_id": current_user["_id"]}) or {}
+            merged = dict(user_doc.get("settings") or {})
+            merged.update(incoming)
             users_collection.update_one(
                 {"_id": current_user["_id"]},
-                {"$set": update_data}
+                {"$set": {"settings": merged}}
             )
         
         return {"message": "Settings updated successfully"}
