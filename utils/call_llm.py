@@ -32,17 +32,20 @@ _cache = create_llm_cache()
 # where parallel jobs fail each other.
 _groq_gate = threading.Lock()
 
-_RETRY_AFTER_RE = re.compile(r"try again in ([0-9.]+)s", re.IGNORECASE)
+# Groq formats retry hints as "7.66s", "1m2.638s", or "2m3s".
+_RETRY_AFTER_RE = re.compile(r"try again in (?:(\d+)m)?([0-9.]+)s", re.IGNORECASE)
 
 
 def _retry_delay(error_text: str, attempt: int) -> float:
     match = _RETRY_AFTER_RE.search(error_text)
     if match:
-        return min(float(match.group(1)) + 1.0, 120.0)
-    return min(15.0 * (attempt + 1), 90.0)
+        minutes = int(match.group(1) or 0)
+        seconds = float(match.group(2))
+        return min(minutes * 60 + seconds + 1.0, 180.0)
+    return min(20.0 * (attempt + 1), 120.0)
 
 
-def call_llm(prompt: str, use_cache: bool = True) -> str:
+def call_llm(prompt: str, use_cache: bool = True, max_tokens: int = None) -> str:
     # Log the prompt
     logger.info(f"PROMPT: {prompt}")
 
@@ -60,29 +63,53 @@ def call_llm(prompt: str, use_cache: bool = True) -> str:
 
     client = Groq(api_key=os.getenv("GROQ_API_KEY"))
     max_retries = int(os.getenv("GROQ_RATE_RETRIES", "4"))
+    model = os.getenv("GROQ_MODEL", "meta-llama/llama-4-scout-17b-16e-instruct")
+    # The free tier's daily token budget is per model, so a sibling model is
+    # instant relief when the primary's daily quota runs dry.
+    fallback_model = os.getenv("GROQ_FALLBACK_MODEL", "openai/gpt-oss-20b")
     response_text = None
     last_error = None
 
     for attempt in range(max_retries + 1):
         try:
+            kwargs = dict(
+                model=model,
+                messages=[{"role": "user", "content": prompt}],
+                temperature=0.7,
+                max_completion_tokens=max_tokens or int(os.getenv("GROQ_MAX_TOKENS", "4000")),
+                top_p=1,
+            )
+            # gpt-oss are reasoning models: cap hidden reasoning so small
+            # completion budgets yield actual text (and burn fewer tokens).
+            if "gpt-oss" in model:
+                kwargs["reasoning_effort"] = os.getenv("GROQ_REASONING_EFFORT", "low")
             with _groq_gate:
-                completion = client.chat.completions.create(
-                    model=os.getenv("GROQ_MODEL", "meta-llama/llama-4-scout-17b-16e-instruct"),
-                    messages=[{"role": "user", "content": prompt}],
-                    temperature=0.7,
-                    max_completion_tokens=int(os.getenv("GROQ_MAX_TOKENS", "4000")),
-                    top_p=1,
-                )
+                completion = client.chat.completions.create(**kwargs)
             response_text = completion.choices[0].message.content
+            if not (response_text or "").strip():
+                raise RuntimeError("empty completion (reasoning consumed the token budget)")
             break
         except Exception as e:  # noqa: BLE001 - normalize provider errors below
             last_error = e
             status = getattr(e, "status_code", None)
+            message = str(e)
             if status == 429 and attempt < max_retries:
-                delay = _retry_delay(str(e), attempt)
+                daily_exhausted = "per day" in message or "TPD" in message
+                if daily_exhausted and fallback_model and model != fallback_model:
+                    logger.warning(f"Daily token budget for {model} exhausted; switching to {fallback_model}")
+                    model = fallback_model
+                    continue
+                delay = _retry_delay(message, attempt)
                 logger.warning(f"Groq rate limited (attempt {attempt + 1}); sleeping {delay:.1f}s")
                 time.sleep(delay)
                 continue
+            if status == 429 and ("per day" in message or "TPD" in message):
+                logger.error(f"Groq daily budget exhausted: {e}")
+                raise Exception(
+                    "Groq free-tier daily token budget is exhausted for today's models. "
+                    "It refills gradually - try again later, or upgrade the Groq tier. "
+                    f"Provider message: {e}"
+                )
             logger.error(f"Groq API call failed: {e}")
             raise Exception(f"API call failed: {e}")
 

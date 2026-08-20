@@ -13,6 +13,19 @@ from utils.crawl_local_files import crawl_local_files
 # don't grow linearly with chapter count (Groq free tier: 8k tokens/min incl. output).
 PREVIOUS_CHAPTERS_MAX_CHARS = int(os.getenv("PREVIOUS_CHAPTERS_MAX_CHARS", "6000"))
 
+# Cap embedded file content so prompts stay inside strict TPM budgets
+FILE_SNIPPET_MAX_CHARS = int(os.getenv("FILE_SNIPPET_MAX_CHARS", "6000"))
+
+
+def snippet(content, limit=None):
+    """Truncate file content for LLM prompts, marking the cut."""
+    limit = limit or FILE_SNIPPET_MAX_CHARS
+    if content is None or len(content) <= limit:
+        return content
+    return content[:limit] + "\n# [... truncated for length ...]"
+
+
+
 
 def build_previous_chapters_context(chapters, max_chars=PREVIOUS_CHAPTERS_MAX_CHARS):
     """Return earlier chapters joined by '---', truncating each so the whole
@@ -211,7 +224,7 @@ class IdentifyAbstractions(Node):
             context = ""
             file_info = []  # Store tuples of (index, path)
             for i, (path, content) in enumerate(files_data):
-                entry = f"--- File Index {i}: {path} ---\n{content}\n\n"
+                entry = f"--- File Index {i}: {path} ---\n{snippet(content)}\n\n"
                 context += entry
                 file_info.append((i, path))
 
@@ -290,7 +303,7 @@ Format the output as a YAML list of dictionaries:
     - 5 # path/to/another.js
 # ... up to {max_abstraction_num} abstractions
 ```"""
-        response = call_llm(prompt, use_cache=(use_cache and self.cur_retry == 0))  # Use cache only if enabled and not retrying
+        response = call_llm(prompt, use_cache=(use_cache and self.cur_retry == 0), max_tokens=1500)  # abstractions YAML is small
 
         # --- Validation ---
         yaml_str = response.strip().split("```yaml")[1].split("```")[0].strip()
@@ -392,7 +405,7 @@ class AnalyzeRelationships(Node):
         )
         # Format file content for context
         file_context_str = "\\n\\n".join(
-            f"--- File: {idx_path} ---\\n{content}"
+            f"--- File: {idx_path} ---\\n{snippet(content)}"
             for idx_path, content in relevant_files_content_map.items()
         )
         context += file_context_str
@@ -464,7 +477,7 @@ relationships:
 
 Now, provide the YAML output:
 """
-        response = call_llm(prompt, use_cache=(use_cache and self.cur_retry == 0)) # Use cache only if enabled and not retrying
+        response = call_llm(prompt, use_cache=(use_cache and self.cur_retry == 0), max_tokens=1200) # relationships YAML is small
 
         # --- Validation ---
         yaml_str = response.strip().split("```yaml")[1].split("```")[0].strip()
@@ -609,7 +622,7 @@ Output the ordered list of abstraction indices, including the name in a comment 
 
 Now, provide the YAML output:
 """
-        response = call_llm(prompt, use_cache=(use_cache and self.cur_retry == 0)) # Use cache only if enabled and not retrying
+        response = call_llm(prompt, use_cache=(use_cache and self.cur_retry == 0), max_tokens=600) # chapter order list is tiny
 
         # --- Validation ---
         yaml_str = response.strip().split("```yaml")[1].split("```")[0].strip()
@@ -807,7 +820,7 @@ class WriteChapters(BatchNode):
 
         # Prepare file context string from the map
         file_context_str = "\n\n".join(
-            f"--- File: {idx_path.split('# ')[1] if '# ' in idx_path else idx_path} ---\n{content}"
+            f"--- File: {idx_path.split('# ')[1] if '# ' in idx_path else idx_path} ---\n{snippet(content, FILE_SNIPPET_MAX_CHARS + 2000)}"
             for idx_path, content in item["related_files_content_map"].items()
         )
 
@@ -890,7 +903,7 @@ Instructions for the chapter (Generate content in {language.capitalize()} unless
 
 Now, directly provide a super beginner-friendly Markdown output (DON'T need ```markdown``` tags):
 """
-        chapter_content = call_llm(prompt, use_cache=(use_cache and self.cur_retry == 0)) # Use cache only if enabled and not retrying
+        chapter_content = call_llm(prompt, use_cache=(use_cache and self.cur_retry == 0), max_tokens=int(os.getenv("GROQ_MAX_TOKENS", "2500"))) # chapters need the full budget
         # Basic validation/cleanup
         actual_heading = f"# Chapter {chapter_num}: {abstraction_name}"  # Use potentially translated name
         if not chapter_content.strip().startswith(f"# Chapter {chapter_num}"):
