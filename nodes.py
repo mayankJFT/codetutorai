@@ -25,6 +25,29 @@ def snippet(content, limit=None):
     return content[:limit] + "\n# [... truncated for length ...]"
 
 
+# Total character budget for multi-file prompt context (~6k tokens)
+PROMPT_CONTEXT_MAX_CHARS = int(os.getenv("PROMPT_CONTEXT_MAX_CHARS", "24000"))
+
+
+def build_files_context(files_data, total_chars=None):
+    """Join files into prompt context bounded by a TOTAL character budget.
+
+    Every file appears (so indices stay valid); the budget is split evenly,
+    with a floor so tiny slices still show a file's head. Returns
+    (context_str, [(index, path), ...]).
+    """
+    total_chars = total_chars or PROMPT_CONTEXT_MAX_CHARS
+    file_info = [(i, path) for i, (path, _) in enumerate(files_data)]
+    if not files_data:
+        return "", file_info
+    per_file = max(500, total_chars // len(files_data))
+    parts = []
+    for i, (path, content) in enumerate(files_data):
+        body = snippet(content, per_file)
+        parts.append(f"--- File Index {i}: {path} ---\n{body}\n\n")
+    return "".join(parts), file_info
+
+
 
 
 def build_previous_chapters_context(chapters, max_chars=PREVIOUS_CHAPTERS_MAX_CHARS):
@@ -220,17 +243,7 @@ class IdentifyAbstractions(Node):
         max_abstraction_num = shared.get("max_abstraction_num", 10)  # Get max_abstraction_num, default to 10
 
         # Helper to create context from files, respecting limits (basic example)
-        def create_llm_context(files_data):
-            context = ""
-            file_info = []  # Store tuples of (index, path)
-            for i, (path, content) in enumerate(files_data):
-                entry = f"--- File Index {i}: {path} ---\n{snippet(content)}\n\n"
-                context += entry
-                file_info.append((i, path))
-
-            return context, file_info  # file_info is list of (index, path)
-
-        context, file_info = create_llm_context(files_data)
+        context, file_info = build_files_context(files_data)
         # Format file info for the prompt (comment is just a hint for LLM)
         file_listing_for_prompt = "\n".join(
             [f"- {idx} # {path}" for idx, path in file_info]
@@ -404,9 +417,11 @@ class AnalyzeRelationships(Node):
             files_data, sorted(list(all_relevant_indices))
         )
         # Format file content for context
-        file_context_str = "\\n\\n".join(
-            f"--- File: {idx_path} ---\\n{snippet(content)}"
-            for idx_path, content in relevant_files_content_map.items()
+        _rel_items = list(relevant_files_content_map.items())
+        _rel_per_file = max(500, PROMPT_CONTEXT_MAX_CHARS // max(1, len(_rel_items)))
+        file_context_str = "\n\n".join(
+            f"--- File: {idx_path} ---\n{snippet(content, _rel_per_file)}"
+            for idx_path, content in _rel_items
         )
         context += file_context_str
 
@@ -819,9 +834,11 @@ class WriteChapters(BatchNode):
             item["update_progress"]("Writing chapters", progress, f"Writing chapter {chapter_num} of {total_chapters}: {abstraction_name}")
 
         # Prepare file context string from the map
+        _ch_items = list(item["related_files_content_map"].items())
+        _ch_per_file = max(1000, min(FILE_SNIPPET_MAX_CHARS + 2000, PROMPT_CONTEXT_MAX_CHARS // max(1, len(_ch_items))))
         file_context_str = "\n\n".join(
-            f"--- File: {idx_path.split('# ')[1] if '# ' in idx_path else idx_path} ---\n{snippet(content, FILE_SNIPPET_MAX_CHARS + 2000)}"
-            for idx_path, content in item["related_files_content_map"].items()
+            f"--- File: {idx_path.split('# ')[1] if '# ' in idx_path else idx_path} ---\n{snippet(content, _ch_per_file)}"
+            for idx_path, content in _ch_items
         )
 
         # Get summary of chapters written *before* this one

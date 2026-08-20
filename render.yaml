@@ -31,7 +31,7 @@ services:
       - key: GENERATION_WORKERS
         value: "1"           # one job at a time: concurrent jobs starve each other on Groq's free-tier TPM
       - key: GROQ_FALLBACK_MODEL
-        value: openai/gpt-oss-20b
+        value: openai/gpt-oss-20b,qwen/qwen3.6-27b
       - key: FRONTEND_ORIGIN
         sync: false          # https://<codetutorai-web>.onrender.com
       - key: PDF_SERVICE_URL

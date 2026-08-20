@@ -64,9 +64,10 @@ def call_llm(prompt: str, use_cache: bool = True, max_tokens: int = None) -> str
     client = Groq(api_key=os.getenv("GROQ_API_KEY"))
     max_retries = int(os.getenv("GROQ_RATE_RETRIES", "4"))
     model = os.getenv("GROQ_MODEL", "meta-llama/llama-4-scout-17b-16e-instruct")
-    # The free tier's daily token budget is per model, so a sibling model is
-    # instant relief when the primary's daily quota runs dry.
-    fallback_model = os.getenv("GROQ_FALLBACK_MODEL", "openai/gpt-oss-20b")
+    # The free tier's daily token budget is per model, so sibling models are
+    # instant relief when the primary's daily quota runs dry. Comma-separated chain.
+    _fallbacks = [m.strip() for m in os.getenv("GROQ_FALLBACK_MODEL", "openai/gpt-oss-20b,qwen/qwen3.6-27b").split(",") if m.strip()]
+    fallback_chain = [m for m in _fallbacks if m != model]
     response_text = None
     last_error = None
 
@@ -93,11 +94,19 @@ def call_llm(prompt: str, use_cache: bool = True, max_tokens: int = None) -> str
             last_error = e
             status = getattr(e, "status_code", None)
             message = str(e)
+            if status == 413 or "reduce your message size" in message:
+                logger.error(f"Groq request too large: {e}")
+                raise Exception(
+                    "The prompt exceeds Groq's per-request token limit. This usually means the "
+                    "repository is large - lower PROMPT_CONTEXT_MAX_CHARS, tighten the include "
+                    f"patterns, or upgrade the Groq tier. Provider message: {e}"
+                )
             if status == 429 and attempt < max_retries:
                 daily_exhausted = "per day" in message or "TPD" in message
-                if daily_exhausted and fallback_model and model != fallback_model:
-                    logger.warning(f"Daily token budget for {model} exhausted; switching to {fallback_model}")
-                    model = fallback_model
+                if daily_exhausted and fallback_chain:
+                    next_model = fallback_chain.pop(0)
+                    logger.warning(f"Daily token budget for {model} exhausted; switching to {next_model}")
+                    model = next_model
                     continue
                 delay = _retry_delay(message, attempt)
                 logger.warning(f"Groq rate limited (attempt {attempt + 1}); sleeping {delay:.1f}s")

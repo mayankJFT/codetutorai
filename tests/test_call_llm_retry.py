@@ -74,11 +74,28 @@ def test_tpd_429_switches_to_fallback_model(monkeypatch, no_sleep):
     assert calls[1]["model"] == "m2"
 
 
-def test_tpd_on_both_models_raises_clear_error(monkeypatch, no_sleep):
+def test_tpd_on_all_models_raises_clear_error(monkeypatch, no_sleep):
     def fail_daily(kw):
         raise FakeRateLimit("tokens per day (TPD): Limit 200000")
     with pytest.raises(Exception, match="daily token budget"):
-        run(monkeypatch, [fail_daily] * 6, GROQ_MODEL="m1", GROQ_FALLBACK_MODEL="m2", GROQ_RATE_RETRIES="2")
+        run(monkeypatch, [fail_daily] * 8, GROQ_MODEL="m1", GROQ_FALLBACK_MODEL="m2,m3", GROQ_RATE_RETRIES="2")
+
+
+def test_tpd_chain_walks_all_fallbacks(monkeypatch, no_sleep):
+    def step(kw):
+        if kw["model"] in ("m1", "m2"):
+            raise FakeRateLimit("tokens per day (TPD): Limit 200000")
+        return "third-model"
+    out, calls = run(monkeypatch, [step] * 4, GROQ_MODEL="m1", GROQ_FALLBACK_MODEL="m2,m3")
+    assert out == "third-model"
+    assert [c["model"] for c in calls] == ["m1", "m2", "m3"]
+
+
+def test_413_fails_fast_with_clear_error(monkeypatch, no_sleep):
+    def too_big(kw):
+        raise FakeRateLimit("Request too large... please reduce your message size and try again.", status_code=413)
+    with pytest.raises(Exception, match="per-request token limit"):
+        run(monkeypatch, [too_big] * 3, GROQ_MODEL="m1")
 
 
 def test_reasoning_effort_only_for_gpt_oss(monkeypatch, no_sleep):
