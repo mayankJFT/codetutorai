@@ -5,14 +5,10 @@ services:
   - type: web
     name: codetutorai-api
     runtime: python
-    plan: starter            # needed for the persistent disk; free tier loses SQLite data on restart
+    plan: free               # NOTE: no persistent disk on free — SQLite data is wiped on every deploy/restart
     buildCommand: pip install -r requirements.txt
     startCommand: uvicorn backend:app --host 0.0.0.0 --port $PORT --workers ${WEB_CONCURRENCY:-1}
     healthCheckPath: /
-    disk:
-      name: data
-      mountPath: /data
-      sizeGB: 1
     envVars:
       - key: PYTHON_VERSION
         value: "3.12.3"
@@ -26,12 +22,13 @@ services:
         value: "4000"
       - key: SECRET_KEY
         generateValue: true
+      # Ephemeral storage on free tier (upgrade to starter + a /data disk to persist)
       - key: SQLITE_PATH
-        value: /data/codetutorai.db
+        value: ./codetutorai.db
       - key: LLM_CACHE_PATH
-        value: /data/llm_cache.db
+        value: ./llm_cache.db
       - key: LOG_DIR
-        value: /data/logs
+        value: ./logs
       - key: WEB_CONCURRENCY
         value: "1"
       - key: GENERATION_WORKERS
