@@ -56,7 +56,7 @@ def call_llm(prompt: str, use_cache: bool = True) -> str:
             model=os.getenv("GROQ_MODEL", "meta-llama/llama-4-scout-17b-16e-instruct"),
             messages=[{"role": "user", "content": prompt}],
             temperature=0.7,
-            max_completion_tokens=4000,
+            max_completion_tokens=int(os.getenv("GROQ_MAX_TOKENS", "4000")),
             top_p=1,
         )
 

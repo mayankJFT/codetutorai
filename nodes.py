@@ -9,6 +9,32 @@ from utils.crawl_local_files import crawl_local_files
 
 
 # Helper to get content for specific file indices
+# Keep the "previous chapters" context passed to the LLM bounded so prompts
+# don't grow linearly with chapter count (Groq free tier: 8k tokens/min incl. output).
+PREVIOUS_CHAPTERS_MAX_CHARS = int(os.getenv("PREVIOUS_CHAPTERS_MAX_CHARS", "6000"))
+
+
+def build_previous_chapters_context(chapters, max_chars=PREVIOUS_CHAPTERS_MAX_CHARS):
+    """Return earlier chapters joined by '---', truncating each so the whole
+    string stays within max_chars while every chapter heading survives."""
+    if not chapters:
+        return ""
+    marker = "\n[... truncated ...]"
+    sep = "\n---\n"
+    budget_per_chapter = max(len(marker) + 1, (max_chars - sep_total(len(chapters), sep)) // len(chapters))
+    parts = []
+    for chapter in chapters:
+        if len(chapter) <= budget_per_chapter:
+            parts.append(chapter)
+        else:
+            parts.append(chapter[: budget_per_chapter - len(marker)] + marker)
+    return sep.join(parts)[:max_chars]
+
+
+def sep_total(n, sep):
+    return len(sep) * max(0, n - 1)
+
+
 def get_content_for_indices(files_data, indices):
     content_map = {}
     for i in indices:
@@ -779,7 +805,7 @@ class WriteChapters(BatchNode):
 
         # Get summary of chapters written *before* this one
         # Use the temporary instance variable
-        previous_chapters_summary = "\n---\n".join(self.chapters_written_so_far)
+        previous_chapters_summary = build_previous_chapters_context(self.chapters_written_so_far)
 
         # Add language instruction and context notes only if not English
         language_instruction = ""

@@ -33,7 +33,7 @@ An intelligent AI-powered platform that generates comprehensive tutorials from a
 
 **Backend**
 - FastAPI (Python web framework)
-- MongoDB Atlas (cloud database)
+- SQLite (local database, zero setup)
 - OpenAI GPT-4 (AI analysis engine)
 - ReportLab (PDF generation)
 - Asyncio (concurrent processing)
@@ -55,7 +55,6 @@ An intelligent AI-powered platform that generates comprehensive tutorials from a
 
 - Python 3.8+
 - Node.js 16+
-- MongoDB Atlas account
 - OpenAI API key
 
 ## ⚡ Quick Start
@@ -77,7 +76,7 @@ pip install -r requirements.txt
 
 # Configure environment variables
 cp .env.example .env
-# Add your MongoDB URI and OpenAI API key
+# Add your Groq API key (SQLite DB is created automatically)
 ```
 
 ### 3. Frontend Setup
@@ -108,18 +107,23 @@ node pdf-server.js
 ### Environment Variables
 ```bash
 # .env file
-MONGODB_URI=your_mongodb_connection_string
-OPENAI_API_KEY=your_openai_api_key
-JWT_SECRET=your_jwt_secret
+GROQ_API_KEY=your_groq_api_key
+# Model + budgets. Groq free tier allows 8000 tokens/min (input+output), so keep these small:
+GROQ_MODEL=openai/gpt-oss-120b
+GROQ_MAX_TOKENS=2500
+PREVIOUS_CHAPTERS_MAX_CHARS=4000
+SECRET_KEY=your_jwt_secret
+# Optional: Node PDF service URL (default http://localhost:3001/generate-pdf)
+PDF_SERVICE_URL=http://localhost:3001/generate-pdf
+# Optional: where the SQLite file lives (default: ./codetutorai.db)
+SQLITE_PATH=./codetutorai.db
 BACKEND_URL=http://localhost:8000
 ```
 
-### MongoDB Setup
-1. Create MongoDB Atlas account
-2. Create new cluster
-3. Add connection IP to whitelist
-4. Create database user
-5. Copy connection string to .env
+### Database
+The backend uses a local SQLite file (`codetutorai.db` by default, override with `SQLITE_PATH`).
+It is created automatically on first start — no external database service is required.
+To reset all data, stop the backend and delete the `.db` file.
 
 ### OpenAI Setup
 1. Sign up at OpenAI Platform
@@ -237,12 +241,11 @@ GET  /tutorials/{id}      # Get tutorial content
 
 ### Common Issues
 
-**MongoDB Connection Error**
+**Database Errors / Reset**
 ```bash
-# Check connection string format
-mongodb+srv://username:password@cluster.mongodb.net/dbname
-
-# Verify IP whitelist in MongoDB Atlas
+# The SQLite database lives at ./codetutorai.db (or $SQLITE_PATH).
+# To start fresh, stop the backend and remove it:
+rm codetutorai.db codetutorai.db-wal codetutorai.db-shm
 ```
 
 **OpenAI API Limits**

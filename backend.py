@@ -1,5 +1,5 @@
 """
-Enhanced FastAPI backend for CodeTutorAI Tutorial Generator with MongoDB and Authentication
+Enhanced FastAPI backend for CodeTutorAI Tutorial Generator with SQLite persistence and Authentication
 """
 
 from dotenv import load_dotenv
@@ -35,11 +35,8 @@ import tempfile
 import base64
 import html
 
-# MongoDB imports
-from pymongo import MongoClient
-from pymongo.database import Database
-from pymongo.collection import Collection
-from bson import ObjectId
+# Local SQLite document store
+from database import SQLiteStore, Collection
 
 # Import the flow creation function
 from flow import create_tutorial_flow
@@ -58,41 +55,20 @@ app.add_middleware(
 # JWT Configuration
 SECRET_KEY = os.getenv("SECRET_KEY", "your-secret-key-change-in-production")
 ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 30
+ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "1440"))  # default 24h, matches frontend cookie lifetime
 
-# MongoDB Configuration
-MONGODB_URL = os.getenv("MONGODB_URL", "mongodb://localhost:27017")
-DATABASE_NAME = os.getenv("DATABASE_NAME", "codetutorai")
+# SQLite Configuration (local persistence)
+SQLITE_PATH = os.getenv("SQLITE_PATH", os.path.join(os.path.dirname(os.path.abspath(__file__)), "codetutorai.db"))
 
-# Initialize MongoDB connection
-try:
-    # Configure MongoDB client with SSL settings for Atlas
-    client = MongoClient(
-        MONGODB_URL,
-        tls=True,
-        tlsAllowInvalidCertificates=True,
-        serverSelectionTimeoutMS=10000,
-        connectTimeoutMS=20000,
-        socketTimeoutMS=30000,
-        retryWrites=True,
-        w='majority'
-    )
-    # Test the connection
-    client.admin.command('ping')
-    db: Database = client[DATABASE_NAME]
-    users_collection: Collection = db.users
-    projects_collection: Collection = db.projects
-    jobs_collection: Collection = db.jobs
-    tutorials_collection: Collection = db.tutorials
-    print(f"✅ Connected to MongoDB at {MONGODB_URL}")
-except Exception as e:
-    print(f"❌ Failed to connect to MongoDB: {e}")
-    print("⚠️  Running in local mode without MongoDB - authentication and persistence disabled")
-    # Fallback to in-memory storage
-    users_collection = None
-    projects_collection = None
-    jobs_collection = None
-    tutorials_collection = None
+db = SQLiteStore(SQLITE_PATH)
+users_collection: Collection = db["users"]
+projects_collection: Collection = db["projects"]
+jobs_collection: Collection = db["jobs"]
+tutorials_collection: Collection = db["tutorials"]
+print(f"✅ Using SQLite database at {SQLITE_PATH}")
+
+# Node.js PDF service (frontend/pdf-server.js); falls back to ReportLab if unreachable
+PDF_SERVICE_URL = os.getenv("PDF_SERVICE_URL", "http://localhost:3001/generate-pdf")
 
 # Thread pool for running flows
 executor = ThreadPoolExecutor(max_workers=3)
@@ -778,7 +754,7 @@ def generate_pdf_with_nodejs_service(content: str, title: str, user_email: str =
         
         # Call the PDF service
         response = requests.post(
-            'http://localhost:3001/generate-pdf',
+            PDF_SERVICE_URL,
             json=payload,
             headers={'Content-Type': 'application/json'},
             timeout=60
@@ -801,8 +777,8 @@ def generate_pdf_with_nodejs_service(content: str, title: str, user_email: str =
         print(f"Unexpected error in PDF generation: {e}")
         raise ValueError(f"PDF generation failed: {e}")
 
-def save_tutorial_to_mongodb(project_id: str, user_id: str, tutorial_content: str, title: str, chapters: List[Dict[str, Any]]) -> str:
-    """Save tutorial content to MongoDB"""
+def save_tutorial_to_db(project_id: str, user_id: str, tutorial_content: str, title: str, chapters: List[Dict[str, Any]]) -> str:
+    """Save tutorial content to the database"""
     if tutorials_collection is None:
         raise HTTPException(status_code=500, detail="Database not available")
     
@@ -928,7 +904,7 @@ def run_tutorial_flow(job_id: str, config: ProjectConfig, user_id: str):
             "output_dir": shared.get("final_output_dir", ""),
         }
         
-        # Generate tutorial content and save to MongoDB
+        # Generate tutorial content and save to the database
         try:
             tutorial_content = ""
             chapters_list = []
@@ -964,10 +940,10 @@ def run_tutorial_flow(job_id: str, config: ProjectConfig, user_id: str):
                     
                     update_progress("Processing results", 95, f"Found output files in: {output_dir}")
             
-            # Save tutorial to MongoDB if content exists
+            # Save tutorial to the database if content exists
             if tutorial_content.strip():
                 update_progress("Saving tutorial", 98, f"Saving tutorial to database ({len(tutorial_content)} characters total)")
-                tutorial_id = save_tutorial_to_mongodb(
+                tutorial_id = save_tutorial_to_db(
                     project_id=job_id,
                     user_id=user_id,
                     tutorial_content=tutorial_content,
@@ -980,10 +956,10 @@ def run_tutorial_flow(job_id: str, config: ProjectConfig, user_id: str):
                 update_progress("Processing results", 95, "Warning: No tutorial content found to save")
                 
         except Exception as e:
-            error_msg = f"Failed to save tutorial to MongoDB: {e}"
+            error_msg = f"Failed to save tutorial to database: {e}"
             update_progress("Processing results", 95, f"Error: {error_msg}")
             print(f"Warning: {error_msg}")
-            # Continue execution even if MongoDB save fails
+            # Continue execution even if database save fails
         
         # Final completion update with log
         update_progress("Completed", 100, f"Tutorial generation completed successfully! Generated {len(chapters_list)} chapters.")
@@ -1055,7 +1031,7 @@ def run_tutorial_flow(job_id: str, config: ProjectConfig, user_id: str):
 
 @app.get("/")
 async def root():
-    return {"message": "CodeTutor AI - Advanced Code Learning Platform", "version": "2.0.0", "features": ["Authentication", "MongoDB", "GitHub Search", "PDF Generation"]}
+    return {"message": "CodeTutor AI - Advanced Code Learning Platform", "version": "2.0.0", "features": ["Authentication", "SQLite", "GitHub Search", "PDF Generation"]}
 
 # Authentication Routes
 @app.post("/auth/register", response_model=Token)
@@ -1196,6 +1172,9 @@ async def generate_tutorial(config: ProjectConfig, background_tasks: BackgroundT
         }],
         "created_at": datetime.now(timezone.utc),
         "updated_at": datetime.now(timezone.utc),
+        "name": config.project_name or (config.repo_url or config.local_dir or "").rstrip("/").split("/")[-1] or "Untitled project",
+        "source": config.repo_url or config.local_dir,
+        "type": "github" if config.repo_url else "local",
     }
     
     if jobs_collection is not None:
@@ -1218,6 +1197,10 @@ async def get_job_status(job_id: str, current_user: Dict[str, Any] = Depends(get
     
     return {
         "id": job["_id"],
+        "name": job.get("name"),
+        "source": job.get("source"),
+        "type": job.get("type"),
+        "created_at": job["created_at"].isoformat() if job.get("created_at") else None,
         "status": job["status"],
         "progress": job["progress"],
         "current_step": job.get("current_step"),
@@ -1380,6 +1363,9 @@ async def get_dashboard_stats(current_user: Dict[str, Any] = Depends(get_current
         "active_jobs": [
             {
                 "id": str(job["_id"]),
+                "name": job.get("name"),
+                "source": job.get("source"),
+                "type": job.get("type"),
                 "status": job["status"],
                 "progress": job.get("progress", 0),
                 "current_step": job.get("current_step"),
@@ -1408,7 +1394,7 @@ async def get_projects(current_user: Dict[str, Any] = Depends(get_current_user))
     
     projects = list(projects_collection.find({"user_id": current_user["_id"]}))
     
-    # Convert ObjectId to string for JSON serialization
+    # Normalize ids for JSON serialization
     for project in projects:
         project["id"] = project["_id"]
         del project["_id"]
@@ -1468,7 +1454,7 @@ async def get_settings(current_user: Dict[str, Any] = Depends(get_current_user))
     try:
         # Get user with settings from database
         users_collection = db.users
-        user_doc = await users_collection.find_one({"_id": current_user["_id"]})
+        user_doc = users_collection.find_one({"_id": current_user["_id"]})
         
         # Extract settings or use defaults
         user_settings = user_doc.get("settings", {}) if user_doc else {}
@@ -1538,7 +1524,7 @@ async def update_settings(settings: Dict[str, Any], current_user: Dict[str, Any]
             update_data["settings.notifications"] = settings["notifications"]
         
         if update_data:
-            await users_collection.update_one(
+            users_collection.update_one(
                 {"_id": current_user["_id"]},
                 {"$set": update_data}
             )
@@ -1558,7 +1544,7 @@ async def get_tutorials(current_user: Dict[str, Any] = Depends(get_current_user)
     
     tutorials = list(tutorials_collection.find({"user_id": current_user["_id"]}))
     
-    # Convert ObjectId to string and format dates
+    # Normalize ids and format dates
     for tutorial in tutorials:
         tutorial["id"] = tutorial["_id"]
         del tutorial["_id"]
@@ -1643,11 +1629,11 @@ async def download_project_pdf(project_id: str, current_user: Dict[str, Any] = D
         if tutorials_collection is not None:
             tutorial = tutorials_collection.find_one({"project_id": project_id, "user_id": current_user["_id"]})
             if tutorial:
-                print("Found tutorial in MongoDB, using content from database")
+                print("Found tutorial in database, using content from database")
                 tutorial_content = tutorial["content"]
                 project_name = tutorial["title"]
             else:
-                print("No tutorial found in MongoDB, trying to read from project result")
+                print("No tutorial found in database, trying to read from project result")
                 # Fallback: generate from project result if no tutorial found
                 if not project.get("result") or not project["result"].get("chapters"):
                     print("No result or chapters found in project")
