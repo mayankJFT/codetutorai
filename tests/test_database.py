@@ -167,3 +167,57 @@ def test_find_result_works_with_list_and_len(store):
     res = col.find({})
     assert len(list(res)) == 1
     assert len(res) == 1
+
+
+def test_heavy_concurrent_read_write_mix(store):
+    col = store["jobs"]
+    col.insert_one({"_id": "job", "progress": 0, "logs": []})
+    errors = []
+
+    def writer(i):
+        try:
+            for k in range(20):
+                col.update_one({"_id": "job"}, {"$set": {"progress": k}, "$push": {"logs": f"{i}-{k}"}})
+                col.insert_one({"_id": f"w{i}-{k}"})
+        except Exception as e:  # pragma: no cover
+            errors.append(e)
+
+    def reader():
+        try:
+            for _ in range(50):
+                col.find_one({"_id": "job"})
+                col.find({"progress": {"$gte": 0}})
+        except Exception as e:  # pragma: no cover
+            errors.append(e)
+
+    threads = [threading.Thread(target=writer, args=(i,)) for i in range(4)] + [
+        threading.Thread(target=reader) for _ in range(4)
+    ]
+    for t in threads:
+        t.start()
+    for t in threads:
+        t.join()
+    assert errors == []
+    assert len(col.find_one({"_id": "job"})["logs"]) == 80
+    assert len(list(col.find())) == 81
+
+
+def test_two_store_instances_can_write_concurrently(tmp_path):
+    path = str(tmp_path / "multi.db")
+    a, b = SQLiteStore(path), SQLiteStore(path)
+    errors = []
+
+    def work(store, prefix):
+        try:
+            for i in range(25):
+                store["projects"].insert_one({"_id": f"{prefix}{i}"})
+        except Exception as e:  # pragma: no cover
+            errors.append(e)
+
+    threads = [threading.Thread(target=work, args=(a, "a")), threading.Thread(target=work, args=(b, "b"))]
+    for t in threads:
+        t.start()
+    for t in threads:
+        t.join()
+    assert errors == []
+    assert len(list(SQLiteStore(path)["projects"].find())) == 50

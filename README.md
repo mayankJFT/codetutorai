@@ -108,6 +108,11 @@ node pdf-server.js
 ```bash
 # .env file
 GROQ_API_KEY=your_groq_api_key
+# Optional: GitHub token for repo fetching (avoids the 60 req/hr anonymous limit)
+GITHUB_TOKEN=ghp_...
+# Concurrency (defaults shown): uvicorn worker processes / parallel generation jobs
+WEB_CONCURRENCY=2
+GENERATION_WORKERS=2
 # Model + budgets. Groq free tier allows 8000 tokens/min (input+output), so keep these small:
 GROQ_MODEL=openai/gpt-oss-120b
 GROQ_MAX_TOKENS=2500

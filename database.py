@@ -101,61 +101,63 @@ class Collection:
     def __init__(self, store: "SQLiteStore", name: str):
         self._store = store
         self.name = name
-        with store._lock:
-            store._conn.execute(
-                f'CREATE TABLE IF NOT EXISTS "{name}" (id TEXT PRIMARY KEY, doc TEXT NOT NULL)'
-            )
-            store._conn.commit()
+        store._ensure_table(name)
 
     # -- internal helpers -------------------------------------------------
-    def _rows(self) -> Iterable[Dict[str, Any]]:
-        cur = self._store._conn.execute(f'SELECT doc FROM "{self.name}"')
+    @property
+    def _conn(self) -> "sqlite3.Connection":
+        return self._store._connection()
+
+    def _rows(self, conn=None) -> Iterable[Dict[str, Any]]:
+        cur = (conn or self._conn).execute(f'SELECT doc FROM "{self.name}"')
         return (_decode(json.loads(row[0])) for row in cur.fetchall())
 
-    def _scan(self, query: Optional[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    def _scan(self, query: Optional[Dict[str, Any]], conn=None) -> List[Dict[str, Any]]:
+        conn = conn or self._conn
         # Fast path: exact lookup by primary key.
         if query and isinstance(query.get("_id"), str):
-            cur = self._store._conn.execute(
-                f'SELECT doc FROM "{self.name}" WHERE id = ?', (query["_id"],)
-            )
+            cur = conn.execute(f'SELECT doc FROM "{self.name}" WHERE id = ?', (query["_id"],))
             row = cur.fetchone()
             if row is None:
                 return []
             doc = _decode(json.loads(row[0]))
             return [doc] if _matches(doc, query) else []
-        return [doc for doc in self._rows() if _matches(doc, query)]
+        return [doc for doc in self._rows(conn) if _matches(doc, query)]
 
-    def _write(self, doc: Dict[str, Any]) -> None:
-        self._store._conn.execute(
+    def _write(self, doc: Dict[str, Any], conn=None) -> None:
+        (conn or self._conn).execute(
             f'UPDATE "{self.name}" SET doc = ? WHERE id = ?',
             (json.dumps(_encode(doc)), doc["_id"]),
         )
 
     # -- public API -------------------------------------------------------
     def find_one(self, query: Optional[Dict[str, Any]] = None) -> Optional[Dict[str, Any]]:
-        with self._store._lock:
-            found = self._scan(query)
+        found = self._scan(query)
         return found[0] if found else None
 
     def find(self, query: Optional[Dict[str, Any]] = None) -> Cursor:
-        with self._store._lock:
-            return Cursor(self._scan(query))
+        return Cursor(self._scan(query))
 
     def insert_one(self, doc: Dict[str, Any]) -> InsertResult:
         if "_id" not in doc:
             doc["_id"] = str(uuid.uuid4())
-        with self._store._lock:
-            self._store._conn.execute(
+        conn = self._conn
+        with conn:
+            conn.execute(
                 f'INSERT INTO "{self.name}" (id, doc) VALUES (?, ?)',
                 (doc["_id"], json.dumps(_encode(doc))),
             )
-            self._store._conn.commit()
         return InsertResult(doc["_id"])
 
     def update_one(self, query: Dict[str, Any], update: Dict[str, Any]) -> UpdateResult:
-        with self._store._lock:
-            found = self._scan(query)
+        conn = self._conn
+        # BEGIN IMMEDIATE takes the write lock up front so the
+        # read-modify-write below is atomic across threads and processes.
+        conn.execute("BEGIN IMMEDIATE")
+        try:
+            found = self._scan(query, conn)
             if not found:
+                conn.execute("ROLLBACK")
                 return UpdateResult(0, 0)
             doc = found[0]
             for op, fields in update.items():
@@ -166,33 +168,73 @@ class Collection:
                         doc.setdefault(key, []).append(value)
                 else:
                     raise ValueError(f"Unsupported update operator: {op}")
-            self._write(doc)
-            self._store._conn.commit()
+            self._write(doc, conn)
+            conn.execute("COMMIT")
             return UpdateResult(1, 1)
+        except Exception:
+            try:
+                conn.execute("ROLLBACK")
+            except sqlite3.OperationalError:
+                pass
+            raise
 
     def delete_one(self, query: Dict[str, Any]) -> DeleteResult:
-        with self._store._lock:
-            found = self._scan(query)
+        conn = self._conn
+        conn.execute("BEGIN IMMEDIATE")
+        try:
+            found = self._scan(query, conn)
             if not found:
+                conn.execute("ROLLBACK")
                 return DeleteResult(0)
-            self._store._conn.execute(
-                f'DELETE FROM "{self.name}" WHERE id = ?', (found[0]["_id"],)
-            )
-            self._store._conn.commit()
+            conn.execute(f'DELETE FROM "{self.name}" WHERE id = ?', (found[0]["_id"],))
+            conn.execute("COMMIT")
             return DeleteResult(1)
+        except Exception:
+            try:
+                conn.execute("ROLLBACK")
+            except sqlite3.OperationalError:
+                pass
+            raise
 
 
 class SQLiteStore:
-    """Document store over a single SQLite file. Thread-safe via a lock."""
+    """Document store over a single SQLite file.
+
+    Concurrency model: one connection per thread (``threading.local``),
+    WAL journal so readers never block the writer, a generous busy timeout
+    so concurrent writers queue instead of erroring, and ``BEGIN IMMEDIATE``
+    transactions around read-modify-write updates so they are atomic across
+    both threads and processes.
+    """
 
     def __init__(self, path: str):
-        self.path = path
-        directory = os.path.dirname(os.path.abspath(path))
-        os.makedirs(directory, exist_ok=True)
-        self._conn = sqlite3.connect(path, check_same_thread=False)
-        self._conn.execute("PRAGMA journal_mode=WAL")
-        self._lock = threading.RLock()
+        self.path = os.path.abspath(path)
+        os.makedirs(os.path.dirname(self.path), exist_ok=True)
+        self._local = threading.local()
         self._collections: Dict[str, Collection] = {}
+        self._known_tables = set()
+        self._tables_lock = threading.Lock()
+        # Initialize WAL once up front.
+        conn = self._connection()
+        conn.execute("PRAGMA journal_mode=WAL")
+
+    def _connection(self) -> sqlite3.Connection:
+        conn = getattr(self._local, "conn", None)
+        if conn is None:
+            conn = sqlite3.connect(self.path, timeout=30)
+            conn.execute("PRAGMA busy_timeout=30000")
+            conn.execute("PRAGMA synchronous=NORMAL")
+            self._local.conn = conn
+        return conn
+
+    def _ensure_table(self, name: str) -> None:
+        if name in self._known_tables:
+            return
+        with self._tables_lock:
+            conn = self._connection()
+            conn.execute(f'CREATE TABLE IF NOT EXISTS "{name}" (id TEXT PRIMARY KEY, doc TEXT NOT NULL)')
+            conn.commit()
+            self._known_tables.add(name)
 
     def __getitem__(self, name: str) -> Collection:
         if name not in self._collections:

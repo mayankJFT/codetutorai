@@ -70,8 +70,11 @@ print(f"✅ Using SQLite database at {SQLITE_PATH}")
 # Node.js PDF service (frontend/pdf-server.js); falls back to ReportLab if unreachable
 PDF_SERVICE_URL = os.getenv("PDF_SERVICE_URL", "http://localhost:3001/generate-pdf")
 
-# Thread pool for running flows
-executor = ThreadPoolExecutor(max_workers=3)
+# Bounded pool for tutorial-generation jobs. Extra jobs queue as "pending"
+# until a worker frees up, so concurrent users can't trample the shared
+# Groq rate limit or exhaust the machine.
+GENERATION_WORKERS = int(os.getenv("GENERATION_WORKERS", "2"))
+executor = ThreadPoolExecutor(max_workers=GENERATION_WORKERS)
 
 # Security
 security = HTTPBearer()
@@ -803,7 +806,7 @@ def save_tutorial_to_db(project_id: str, user_id: str, tutorial_content: str, ti
     tutorials_collection.insert_one(tutorial_doc)
     return tutorial_id
 
-async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(security)) -> Dict[str, Any]:
+def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(security)) -> Dict[str, Any]:
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
@@ -1030,12 +1033,12 @@ def run_tutorial_flow(job_id: str, config: ProjectConfig, user_id: str):
 # API Routes
 
 @app.get("/")
-async def root():
+def root():
     return {"message": "CodeTutor AI - Advanced Code Learning Platform", "version": "2.0.0", "features": ["Authentication", "SQLite", "GitHub Search", "PDF Generation"]}
 
 # Authentication Routes
 @app.post("/auth/register", response_model=Token)
-async def register(user: UserCreate):
+def register(user: UserCreate):
     if users_collection is None:
         raise HTTPException(status_code=500, detail="Database not available")
     
@@ -1066,7 +1069,7 @@ async def register(user: UserCreate):
     return {"access_token": access_token, "token_type": "bearer"}
 
 @app.post("/auth/login", response_model=Token)
-async def login(user: UserLogin):
+def login(user: UserLogin):
     if users_collection is None:
         raise HTTPException(status_code=500, detail="Database not available")
     
@@ -1088,7 +1091,7 @@ async def login(user: UserLogin):
     return {"access_token": access_token, "token_type": "bearer"}
 
 @app.get("/auth/me", response_model=User)
-async def read_users_me(current_user: Dict[str, Any] = Depends(get_current_user)):
+def read_users_me(current_user: Dict[str, Any] = Depends(get_current_user)):
     return User(
         id=current_user["_id"],
         email=current_user["email"],
@@ -1099,7 +1102,7 @@ async def read_users_me(current_user: Dict[str, Any] = Depends(get_current_user)
 
 # GitHub Search Routes
 @app.post("/github/search")
-async def search_github_repos(search: GitHubRepoSearch, _current_user: Dict[str, Any] = Depends(get_current_user)):
+def search_github_repos(search: GitHubRepoSearch, _current_user: Dict[str, Any] = Depends(get_current_user)):
     """Search GitHub repositories"""
     try:
         url = "https://api.github.com/search/repositories"
@@ -1150,7 +1153,7 @@ async def search_github_repos(search: GitHubRepoSearch, _current_user: Dict[str,
 
 # Tutorial Generation Routes
 @app.post("/generate")
-async def generate_tutorial(config: ProjectConfig, background_tasks: BackgroundTasks, current_user: Dict[str, Any] = Depends(get_current_user)):
+def generate_tutorial(config: ProjectConfig, current_user: Dict[str, Any] = Depends(get_current_user)):
     """Start a new tutorial generation job"""
     job_id = str(uuid.uuid4())
     
@@ -1181,12 +1184,12 @@ async def generate_tutorial(config: ProjectConfig, background_tasks: BackgroundT
         jobs_collection.insert_one(job_doc)
     
     # Submit the flow to run in background
-    background_tasks.add_task(run_tutorial_flow, job_id, config, current_user["_id"])
+    executor.submit(run_tutorial_flow, job_id, config, current_user["_id"])
     
     return {"job_id": job_id}
 
 @app.get("/status/{job_id}")
-async def get_job_status(job_id: str, current_user: Dict[str, Any] = Depends(get_current_user)):
+def get_job_status(job_id: str, current_user: Dict[str, Any] = Depends(get_current_user)):
     """Get the status of a tutorial generation job"""
     if jobs_collection is None:
         raise HTTPException(status_code=500, detail="Database not available")
@@ -1222,14 +1225,14 @@ async def stream_job_status(job_id: str, token: str):
         if email is None:
             raise HTTPException(status_code=401, detail="Invalid token")
         
-        user = users_collection.find_one({"email": email})
+        user = await asyncio.to_thread(users_collection.find_one, {"email": email})
         if user is None:
             raise HTTPException(status_code=401, detail="User not found")
     except JWTError:
         raise HTTPException(status_code=401, detail="Invalid token")
     
     # Verify job exists and belongs to user
-    job = jobs_collection.find_one({"_id": job_id, "user_id": user["_id"]})
+    job = await asyncio.to_thread(jobs_collection.find_one, {"_id": job_id, "user_id": user["_id"]})
     if not job:
         raise HTTPException(status_code=404, detail="Job not found")
     
@@ -1239,8 +1242,10 @@ async def stream_job_status(job_id: str, token: str):
         
         while True:
             try:
-                # Get current job status
-                current_job = jobs_collection.find_one({"_id": job_id, "user_id": user["_id"]})
+                # Get current job status (in a thread — never block the event loop)
+                current_job = await asyncio.to_thread(
+                    jobs_collection.find_one, {"_id": job_id, "user_id": user["_id"]}
+                )
                 if not current_job:
                     break
                 
@@ -1260,7 +1265,7 @@ async def stream_job_status(job_id: str, token: str):
                         "logs": current_job.get("logs", [])
                     }
                     
-                    yield f"data: {json.dumps(data)}\n\n"
+                    yield f"data: {json.dumps(data, default=str)}\n\n"
                 
                 # Stop streaming if job is complete or failed
                 if current_job["status"] in ["completed", "failed"]:
@@ -1287,7 +1292,7 @@ async def stream_job_status(job_id: str, token: str):
     )
 
 @app.get("/dashboard/stats")
-async def get_dashboard_stats(current_user: Dict[str, Any] = Depends(get_current_user)):
+def get_dashboard_stats(current_user: Dict[str, Any] = Depends(get_current_user)):
     """Get real-time dashboard statistics"""
     if projects_collection is None or jobs_collection is None:
         raise HTTPException(status_code=500, detail="Database not available")
@@ -1387,7 +1392,7 @@ async def get_dashboard_stats(current_user: Dict[str, Any] = Depends(get_current
     }
 
 @app.get("/projects")
-async def get_projects(current_user: Dict[str, Any] = Depends(get_current_user)):
+def get_projects(current_user: Dict[str, Any] = Depends(get_current_user)):
     """Get all projects for the current user"""
     if projects_collection is None:
         raise HTTPException(status_code=500, detail="Database not available")
@@ -1406,7 +1411,7 @@ async def get_projects(current_user: Dict[str, Any] = Depends(get_current_user))
     return projects
 
 @app.get("/projects/{project_id}")
-async def get_project(project_id: str, current_user: Dict[str, Any] = Depends(get_current_user)):
+def get_project(project_id: str, current_user: Dict[str, Any] = Depends(get_current_user)):
     """Get a specific project"""
     if projects_collection is None:
         raise HTTPException(status_code=500, detail="Database not available")
@@ -1425,7 +1430,7 @@ async def get_project(project_id: str, current_user: Dict[str, Any] = Depends(ge
     return project
 
 @app.delete("/projects/{project_id}")
-async def delete_project(project_id: str, current_user: Dict[str, Any] = Depends(get_current_user)):
+def delete_project(project_id: str, current_user: Dict[str, Any] = Depends(get_current_user)):
     """Delete a project"""
     if projects_collection is None:
         raise HTTPException(status_code=500, detail="Database not available")
@@ -1446,7 +1451,7 @@ async def delete_project(project_id: str, current_user: Dict[str, Any] = Depends
     return {"message": "Project deleted successfully"}
 
 @app.get("/settings")
-async def get_settings(current_user: Dict[str, Any] = Depends(get_current_user)):
+def get_settings(current_user: Dict[str, Any] = Depends(get_current_user)):
     """Get application settings"""
     if db is None:
         raise HTTPException(status_code=500, detail="Database not available")
@@ -1495,7 +1500,7 @@ async def get_settings(current_user: Dict[str, Any] = Depends(get_current_user))
         }
 
 @app.put("/settings")
-async def update_settings(settings: Dict[str, Any], current_user: Dict[str, Any] = Depends(get_current_user)):
+def update_settings(settings: Dict[str, Any], current_user: Dict[str, Any] = Depends(get_current_user)):
     """Update application settings"""
     # For now, we'll store settings in the user document
     # In a production app, you might want a separate settings collection
@@ -1537,7 +1542,7 @@ async def update_settings(settings: Dict[str, Any], current_user: Dict[str, Any]
 
 # Tutorial Management Routes
 @app.get("/tutorials")
-async def get_tutorials(current_user: Dict[str, Any] = Depends(get_current_user)):
+def get_tutorials(current_user: Dict[str, Any] = Depends(get_current_user)):
     """Get all tutorials for the current user"""
     if tutorials_collection is None:
         raise HTTPException(status_code=500, detail="Database not available")
@@ -1556,7 +1561,7 @@ async def get_tutorials(current_user: Dict[str, Any] = Depends(get_current_user)
     return tutorials
 
 @app.get("/tutorials/{tutorial_id}")
-async def get_tutorial(tutorial_id: str, current_user: Dict[str, Any] = Depends(get_current_user)):
+def get_tutorial(tutorial_id: str, current_user: Dict[str, Any] = Depends(get_current_user)):
     """Get a specific tutorial"""
     if tutorials_collection is None:
         raise HTTPException(status_code=500, detail="Database not available")
@@ -1575,7 +1580,7 @@ async def get_tutorial(tutorial_id: str, current_user: Dict[str, Any] = Depends(
     return tutorial
 
 @app.get("/tutorials/{tutorial_id}/download/pdf")
-async def download_tutorial_pdf(tutorial_id: str, current_user: Dict[str, Any] = Depends(get_current_user)):
+def download_tutorial_pdf(tutorial_id: str, current_user: Dict[str, Any] = Depends(get_current_user)):
     """Download tutorial as PDF"""
     if tutorials_collection is None:
         raise HTTPException(status_code=500, detail="Database not available")
@@ -1604,7 +1609,7 @@ async def download_tutorial_pdf(tutorial_id: str, current_user: Dict[str, Any] =
         raise HTTPException(status_code=500, detail=f"Failed to generate PDF: {str(e)}")
 
 @app.get("/projects/{project_id}/download/pdf")
-async def download_project_pdf(project_id: str, current_user: Dict[str, Any] = Depends(get_current_user)):
+def download_project_pdf(project_id: str, current_user: Dict[str, Any] = Depends(get_current_user)):
     """Download project tutorial as PDF"""
     print(f"PDF download requested for project {project_id} by user {current_user['_id']}")
     
@@ -1711,7 +1716,7 @@ async def download_project_pdf(project_id: str, current_user: Dict[str, Any] = D
 
 
 @app.delete("/tutorials/{tutorial_id}")
-async def delete_tutorial(tutorial_id: str, current_user: Dict[str, Any] = Depends(get_current_user)):
+def delete_tutorial(tutorial_id: str, current_user: Dict[str, Any] = Depends(get_current_user)):
     """Delete a tutorial"""
     if tutorials_collection is None:
         raise HTTPException(status_code=500, detail="Database not available")
@@ -1725,7 +1730,7 @@ async def delete_tutorial(tutorial_id: str, current_user: Dict[str, Any] = Depen
     return {"message": "Tutorial deleted successfully"}
 
 @app.get("/projects/{project_id}/export")
-async def export_project_tutorial(project_id: str, format: str = "markdown", current_user: Dict[str, Any] = Depends(get_current_user)):
+def export_project_tutorial(project_id: str, format: str = "markdown", current_user: Dict[str, Any] = Depends(get_current_user)):
     """Export project tutorial in different formats"""
     if projects_collection is None:
         raise HTTPException(status_code=500, detail="Database not available")
@@ -1824,4 +1829,8 @@ async def export_project_tutorial(project_id: str, format: str = "markdown", cur
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    web_workers = int(os.getenv("WEB_CONCURRENCY", "2"))
+    if web_workers > 1:
+        uvicorn.run("backend:app", host="0.0.0.0", port=8000, workers=web_workers)
+    else:
+        uvicorn.run(app, host="0.0.0.0", port=8000)
