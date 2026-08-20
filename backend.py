@@ -59,7 +59,12 @@ app.add_middleware(
 )
 
 # JWT Configuration
-SECRET_KEY = os.getenv("SECRET_KEY", "your-secret-key-change-in-production")
+SECRET_KEY = os.getenv("SECRET_KEY")
+if not SECRET_KEY:
+    import secrets as _secrets
+    SECRET_KEY = _secrets.token_hex(32)
+    print("⚠️  SECRET_KEY not set - generated a random one for this run. "
+          "Sessions will not survive restarts; set SECRET_KEY in the environment.")
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "1440"))  # default 24h, matches frontend cookie lifetime
 
@@ -1024,8 +1029,10 @@ def run_tutorial_flow(job_id: str, config: ProjectConfig, user_id: str):
             if not project_name:
                 project_name = "Unnamed Project"
             
+            stored_config = config.model_dump()
+            stored_config.pop("github_token", None)  # never persist or echo user PATs
             project = {
-                "_id": str(uuid.uuid4()),
+                "_id": job_id,  # matches tutorials.project_id (saved with job_id above)
                 "user_id": user_id,
                 "job_id": job_id,
                 "name": project_name,
@@ -1036,7 +1043,7 @@ def run_tutorial_flow(job_id: str, config: ProjectConfig, user_id: str):
                 "created_at": datetime.now(timezone.utc),
                 "completed_at": datetime.now(timezone.utc),
                 "output_dir": result["output_dir"],
-                "config": config.model_dump(),
+                "config": stored_config,
                 "result": result,
             }
             projects_collection.insert_one(project)
@@ -1044,15 +1051,20 @@ def run_tutorial_flow(job_id: str, config: ProjectConfig, user_id: str):
         
     except Exception as e:
         if jobs_collection is not None:
-            jobs_collection.update_one(
-                {"_id": job_id},
-                {"$set": {
-                    "status": "failed",
-                    "error": str(e),
-                    "progress": 0,
-                    "updated_at": datetime.now(timezone.utc)
-                }}
-            )
+            current = jobs_collection.find_one({"_id": job_id}) or {}
+            if current.get("status") == "completed":
+                # Generation succeeded; only bookkeeping failed. Keep the success.
+                print(f"Post-completion bookkeeping failed for job {job_id}: {e}")
+            else:
+                jobs_collection.update_one(
+                    {"_id": job_id},
+                    {"$set": {
+                        "status": "failed",
+                        "error": str(e),
+                        "progress": 0,
+                        "updated_at": datetime.now(timezone.utc)
+                    }}
+                )
 
 # API Routes
 
@@ -1187,6 +1199,9 @@ def generate_tutorial(config: ProjectConfig, current_user: Dict[str, Any] = Depe
     job_id = str(uuid.uuid4())
     
     # Initialize job tracking
+    if config.local_dir and os.getenv("ALLOW_LOCAL_DIRS", "").lower() != "true":
+        raise HTTPException(status_code=400, detail="Local directory sources are disabled on this server. Use a GitHub repository URL.")
+
     if not config.github_token:
         saved_token = (current_user.get("settings") or {}).get("github_token")
         if saved_token:
@@ -1299,7 +1314,7 @@ async def stream_job_status(job_id: str, token: str):
                         "logs": current_job.get("logs", [])
                     }
                     
-                    yield f"data: {json.dumps(data, default=str)}\n\n"
+                    yield f"data: {json.dumps(data, default=lambda o: o.isoformat() if isinstance(o, datetime) else str(o))}\n\n"
                 
                 # Stop streaming if job is complete or failed
                 if current_job["status"] in ["completed", "failed"]:
@@ -1437,6 +1452,8 @@ def get_projects(current_user: Dict[str, Any] = Depends(get_current_user)):
     for project in projects:
         project["id"] = project["_id"]
         del project["_id"]
+        if isinstance(project.get("config"), dict):
+            project["config"].pop("github_token", None)
         if "created_at" in project:
             project["created_at"] = project["created_at"].isoformat()
         if "completed_at" in project:
@@ -1454,6 +1471,8 @@ def get_project(project_id: str, current_user: Dict[str, Any] = Depends(get_curr
     if not project:
         raise HTTPException(status_code=404, detail="Project not found")
     
+    if isinstance(project.get("config"), dict):
+        project["config"].pop("github_token", None)
     project["id"] = project["_id"]
     del project["_id"]
     if "created_at" in project:
@@ -1473,11 +1492,16 @@ def delete_project(project_id: str, current_user: Dict[str, Any] = Depends(get_c
     if not project:
         raise HTTPException(status_code=404, detail="Project not found")
     
-    # Delete output files if they exist
+    # Delete output files only when safely inside the output base directory
     output_dir = project.get("output_dir")
     if output_dir and os.path.exists(output_dir):
-        import shutil
-        shutil.rmtree(output_dir)
+        base = os.path.realpath("output")
+        target = os.path.realpath(output_dir)
+        if target != base and target.startswith(base + os.sep):
+            import shutil
+            shutil.rmtree(target)
+        else:
+            print(f"Refusing to delete suspicious output path: {output_dir!r}")
     
     # Delete from database
     projects_collection.delete_one({"_id": project_id, "user_id": current_user["_id"]})

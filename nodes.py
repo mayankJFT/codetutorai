@@ -29,6 +29,27 @@ def snippet(content, limit=None):
 PROMPT_CONTEXT_MAX_CHARS = int(os.getenv("PROMPT_CONTEXT_MAX_CHARS", "24000"))
 
 
+def extract_yaml_block(response):
+    """Pull the YAML payload out of an LLM response, tolerating missing fences."""
+    text = (response or "").strip()
+    if not text:
+        raise ValueError("Empty LLM response - no YAML found")
+    if "```yaml" in text:
+        return text.split("```yaml", 1)[1].split("```", 1)[0].strip()
+    if "```" in text:
+        parts = text.split("```")
+        if len(parts) >= 3 and parts[1].strip():
+            body = parts[1].strip()
+            return body[4:].strip() if body.startswith("yml") else body
+    return text
+
+
+def safe_path_component(name, fallback="project"):
+    """Reduce arbitrary text to a single safe path segment (no traversal)."""
+    cleaned = re.sub(r"[^A-Za-z0-9._-]+", "_", str(name or "")).strip("._-")
+    return cleaned or fallback
+
+
 def build_files_context(files_data, total_chars=None):
     """Join files into prompt context bounded by a TOTAL character budget.
 
@@ -319,7 +340,7 @@ Format the output as a YAML list of dictionaries:
         response = call_llm(prompt, use_cache=(use_cache and self.cur_retry == 0), max_tokens=1500)  # abstractions YAML is small
 
         # --- Validation ---
-        yaml_str = response.strip().split("```yaml")[1].split("```")[0].strip()
+        yaml_str = extract_yaml_block(response)
         abstractions = yaml.safe_load(yaml_str)
 
         if not isinstance(abstractions, list):
@@ -495,7 +516,7 @@ Now, provide the YAML output:
         response = call_llm(prompt, use_cache=(use_cache and self.cur_retry == 0), max_tokens=1200) # relationships YAML is small
 
         # --- Validation ---
-        yaml_str = response.strip().split("```yaml")[1].split("```")[0].strip()
+        yaml_str = extract_yaml_block(response)
         relationships_data = yaml.safe_load(yaml_str)
 
         if not isinstance(relationships_data, dict) or not all(
@@ -640,7 +661,7 @@ Now, provide the YAML output:
         response = call_llm(prompt, use_cache=(use_cache and self.cur_retry == 0), max_tokens=600) # chapter order list is tiny
 
         # --- Validation ---
-        yaml_str = response.strip().split("```yaml")[1].split("```")[0].strip()
+        yaml_str = extract_yaml_block(response)
         ordered_indices_raw = yaml.safe_load(yaml_str)
 
         if not isinstance(ordered_indices_raw, list):
@@ -954,7 +975,7 @@ class CombineTutorial(Node):
     def prep(self, shared):
         project_name = shared["project_name"]
         output_base_dir = shared.get("output_dir", "output")  # Default output dir
-        output_path = os.path.join(output_base_dir, project_name)
+        output_path = os.path.join(output_base_dir, safe_path_component(project_name))
         repo_url = shared.get("repo_url")  # Get the repository URL
         # language = shared.get("language", "english") # No longer needed for fixed strings
 

@@ -221,3 +221,12 @@ def test_two_store_instances_can_write_concurrently(tmp_path):
         t.join()
     assert errors == []
     assert len(list(SQLiteStore(path)["projects"].find())) == 50
+
+
+def test_malicious_datetime_tag_does_not_crash(store):
+    col = store["users"]
+    # A user-supplied payload shaped like our internal datetime tag must not
+    # break decoding for this or any other request.
+    col.insert_one({"_id": "u1", "settings": {"theme": {"$datetime": "not-a-date"}}})
+    doc = col.find_one({"_id": "u1"})
+    assert doc["settings"]["theme"] == {"$datetime": "not-a-date"}

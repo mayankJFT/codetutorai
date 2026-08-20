@@ -32,7 +32,11 @@ def _encode(obj: Any) -> Any:
 def _decode(obj: Any) -> Any:
     if isinstance(obj, dict):
         if len(obj) == 1 and _DT_TAG in obj:
-            return datetime.fromisoformat(obj[_DT_TAG])
+            # User-supplied data can mimic the tag; never let it break decoding.
+            try:
+                return datetime.fromisoformat(obj[_DT_TAG])
+            except (TypeError, ValueError):
+                return dict(obj)
         return {k: _decode(v) for k, v in obj.items()}
     if isinstance(obj, list):
         return [_decode(v) for v in obj]

@@ -49,9 +49,14 @@ def call_llm(prompt: str, use_cache: bool = True, max_tokens: int = None) -> str
     # Log the prompt
     logger.info(f"PROMPT: {prompt}")
 
+    # Cache is keyed by requested model + prompt so a model switch never
+    # serves stale answers from a different model.
+    requested_model = os.getenv("GROQ_MODEL", "meta-llama/llama-4-scout-17b-16e-instruct")
+    cache_key = f"[{requested_model}] {prompt}"
+
     if use_cache:
         try:
-            cached = _cache.get(prompt)
+            cached = _cache.get(cache_key)
         except Exception as e:  # cache read must never break generation
             logger.warning(f"Cache read failed, proceeding without cache: {e}")
             cached = None
@@ -67,7 +72,7 @@ def call_llm(prompt: str, use_cache: bool = True, max_tokens: int = None) -> str
 
     client = Groq(api_key=os.getenv("GROQ_API_KEY"))
     max_retries = int(os.getenv("GROQ_RATE_RETRIES", "4"))
-    model = os.getenv("GROQ_MODEL", "meta-llama/llama-4-scout-17b-16e-instruct")
+    model = requested_model
     # The free tier's daily token budget is per model, so sibling models are
     # instant relief when the primary's daily quota runs dry. Comma-separated chain.
     _fallbacks = [m.strip() for m in os.getenv("GROQ_FALLBACK_MODEL", "openai/gpt-oss-20b,qwen/qwen3.6-27b").split(",") if m.strip()]
@@ -134,7 +139,7 @@ def call_llm(prompt: str, use_cache: bool = True, max_tokens: int = None) -> str
 
     if use_cache:
         try:
-            _cache.set(prompt, response_text)
+            _cache.set(cache_key, response_text)
         except Exception as e:  # cache failures must never break generation
             logger.error(f"Failed to save cache: {e}")
 
