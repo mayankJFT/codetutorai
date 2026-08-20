@@ -68,7 +68,8 @@ class FetchRepo(Node):
         return {
             "repo_url": repo_url,
             "local_dir": local_dir,
-            "token": shared.get("github_token"),
+            # Priority: per-request token > server-wide GITHUB_TOKEN
+            "token": shared.get("github_token") or os.getenv("GITHUB_TOKEN"),
             "include_patterns": include_patterns,
             "exclude_patterns": exclude_patterns,
             "max_file_size": max_file_size,
