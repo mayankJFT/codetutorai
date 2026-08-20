@@ -100,7 +100,14 @@ class FetchRepo(Node):
         # Convert dict to list of tuples: [(path, content), ...]
         files_list = list(result.get("files", {}).items())
         if len(files_list) == 0:
-            raise (ValueError("Failed to fetch files"))
+            include = sorted(prep_res.get("include_patterns") or []) or ["(all files)"]
+            source = prep_res.get("repo_url") or prep_res.get("local_dir") or "the source"
+            raise ValueError(
+                f"No files to analyze in {source}. Either the repository has no source code, "
+                f"it is private (add a GitHub token in Settings), or the include patterns "
+                f"[{', '.join(include)}] matched nothing - e.g. a docs-only repo needs '*.md' included. "
+                f"Adjust the patterns on the Configure step and try again."
+            )
         print(f"Fetched {len(files_list)} files.")
         return files_list
 
