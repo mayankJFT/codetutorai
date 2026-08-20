@@ -165,11 +165,7 @@ class Tutorial(BaseModel):
     updated_at: datetime
 
 # Helper Functions
-def hash_password(password: str) -> str:
-    return bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
-
-def verify_password(password: str, hashed_password: str) -> bool:
-    return bcrypt.checkpw(password.encode('utf-8'), hashed_password.encode('utf-8'))
+from backend_auth_helpers import hash_password, normalize_email, verify_password
 
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
     to_encode = data.copy()
@@ -1084,6 +1080,7 @@ def register(user: UserCreate):
         raise HTTPException(status_code=500, detail="Database not available")
     
     # Check if user exists
+    user.email = normalize_email(user.email)
     existing_user = users_collection.find_one({"email": user.email})
     if existing_user:
         raise HTTPException(status_code=400, detail="Email already registered")
@@ -1115,6 +1112,7 @@ def login(user: UserLogin):
         raise HTTPException(status_code=500, detail="Database not available")
     
     # Verify user
+    user.email = normalize_email(user.email)
     db_user = users_collection.find_one({"email": user.email})
     if not db_user or not verify_password(user.password, db_user["hashed_password"]):
         raise HTTPException(
